@@ -16,6 +16,10 @@ export function CanvasBackground({ width, height }: CanvasBackgroundProps) {
   return (
     <>
       <defs>
+        {/* Drop shadow filter for shapes */}
+        <filter id="shape-shadow" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx={2} dy={2} stdDeviation={3} floodOpacity={0.25} />
+        </filter>
         {/* Minor dot pattern */}
         <pattern
           id="grid-minor"

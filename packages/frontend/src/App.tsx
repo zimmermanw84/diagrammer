@@ -1,12 +1,12 @@
-import { createEmptyDocument } from "@diagrammer/shared";
-import { DiagramProvider } from "./state/index.js";
-import { Canvas } from "./canvas/Canvas";
+import { DiagramProvider, useDiagram } from "./state/index.js";
+import { Canvas } from "./canvas/Canvas.js";
+import { ShapeLayer } from "./canvas/shapes/ShapeLayer.js";
 
-const doc = createEmptyDocument("My Diagram");
+function DiagramEditor() {
+  const { state, dispatch } = useDiagram();
+  const activePage = state.document.pages.find((p) => p.id === state.activePageId)!;
 
-export function App() {
   return (
-    <DiagramProvider>
     <div style={styles.shell}>
       <div style={styles.toolbar}>
         <strong>Toolbar</strong>
@@ -14,7 +14,18 @@ export function App() {
       </div>
 
       <div style={styles.canvas}>
-        <Canvas page={doc.pages[0]!} />
+        <Canvas
+          page={activePage}
+          onDeselect={() => dispatch({ type: "SET_ACTIVE_PAGE", payload: { pageId: state.activePageId } })}
+        >
+          <ShapeLayer
+            shapes={activePage.shapes}
+            selectedId={state.selection}
+            onSelect={(id) => dispatch({ type: "SELECT", payload: { id } })}
+            onMove={(id, dx, dy) => dispatch({ type: "MOVE_SHAPE", payload: { id, dx, dy } })}
+            onLabelChange={(id, label) => dispatch({ type: "SET_LABEL", payload: { id, label } })}
+          />
+        </Canvas>
       </div>
 
       <div style={styles.properties}>
@@ -22,6 +33,13 @@ export function App() {
         <p style={styles.hint}>Shape properties — T10</p>
       </div>
     </div>
+  );
+}
+
+export function App() {
+  return (
+    <DiagramProvider>
+      <DiagramEditor />
     </DiagramProvider>
   );
 }
