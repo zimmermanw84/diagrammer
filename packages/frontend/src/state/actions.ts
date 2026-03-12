@@ -17,4 +17,5 @@ export type DiagramAction =
   | { type: "ADD_CONNECTOR"; payload: Omit<DiagramConnector, "id"> }
   | { type: "DELETE_CONNECTOR"; payload: { id: string } }
   | { type: "ADD_PAGE"; payload: Omit<DiagramPage, "id" | "shapes" | "connectors"> }
-  | { type: "SET_ACTIVE_PAGE"; payload: { pageId: string } };
+  | { type: "SET_ACTIVE_PAGE"; payload: { pageId: string } }
+  | { type: "SELECT"; payload: { id: string | null } };

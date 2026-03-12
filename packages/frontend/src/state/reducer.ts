@@ -218,6 +218,10 @@ export function diagramReducer(state: State, action: DiagramAction): State {
       };
     }
 
+    case "SELECT": {
+      return { ...state, selection: action.payload.id };
+    }
+
     default:
       return state;
   }

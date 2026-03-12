@@ -6,6 +6,7 @@ import { toPixels } from "./units";
 interface CanvasProps {
   page: DiagramPage;
   children?: React.ReactNode;
+  onDeselect?: () => void;
 }
 
 interface Transform {
@@ -18,7 +19,7 @@ const MIN_SCALE = 0.1;
 const MAX_SCALE = 8;
 const ZOOM_SENSITIVITY = 0.001;
 
-export function Canvas({ page, children }: CanvasProps) {
+export function Canvas({ page, children, onDeselect }: CanvasProps) {
   const svgRef = useRef<SVGSVGElement>(null);
   const [transform, setTransform] = useState<Transform>({ scale: 1, x: 0, y: 0 });
 
@@ -136,6 +137,7 @@ export function Canvas({ page, children }: CanvasProps) {
       onMouseMove={onMouseMove}
       onMouseUp={onMouseUp}
       onMouseLeave={onMouseUp}
+      onClick={(e) => { if (e.target === e.currentTarget) onDeselect?.(); }}
     >
       <g transform={transformStr}>
         {/* Page background */}
