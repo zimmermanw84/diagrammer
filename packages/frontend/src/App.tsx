@@ -4,6 +4,8 @@ import { Canvas } from "./canvas/Canvas.js";
 import { ShapeLayer } from "./canvas/shapes/ShapeLayer.js";
 import { ConnectorLayer } from "./canvas/connectors/ConnectorLayer.js";
 import { ConnectorDrawing, resolveConnectionPoint } from "./canvas/ConnectorDrawing.js";
+import { SelectionOverlay } from "./canvas/SelectionOverlay.js";
+import { useKeyboardShortcuts } from "./canvas/useKeyboardShortcuts.js";
 import { DEFAULT_CONNECTOR_STYLE } from "@diagrammer/shared";
 import type { InProgress } from "./canvas/ConnectorDrawing.js";
 import type { ConnectionPoint } from "./canvas/shapes/ConnectionHandles.js";
@@ -14,6 +16,14 @@ function DiagramEditor() {
   const svgRef = useRef<SVGSVGElement>(null);
   const [transform, setTransform] = useState({ scale: 1, x: 0, y: 0 });
   const [inProgress, setInProgress] = useState<InProgress | null>(null);
+  const selectedShape = activePage.shapes.find((s) => s.id === state.selection) ?? null;
+
+  useKeyboardShortcuts({
+    selection: state.selection,
+    shapes: activePage.shapes,
+    connectors: activePage.connectors,
+    dispatch,
+  });
 
   const handleStartConnect = (shapeId: string, point: ConnectionPoint) => {
     const shape = activePage.shapes.find((s) => s.id === shapeId);
@@ -71,6 +81,14 @@ function DiagramEditor() {
             inProgress={inProgress}
             setInProgress={setInProgress}
           />
+          {selectedShape && (
+            <SelectionOverlay
+              shape={selectedShape}
+              onResize={(id, width, height) =>
+                dispatch({ type: "RESIZE_SHAPE", payload: { id, width, height } })
+              }
+            />
+          )}
         </Canvas>
       </div>
 

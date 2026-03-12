@@ -17,7 +17,7 @@ interface ShapeElementProps {
 
 export function ShapeElement({
   shape,
-  isSelected,
+  isSelected: _isSelected,
   onSelect,
   onMove,
   onLabelChange,
@@ -91,21 +91,6 @@ export function ShapeElement({
       onMouseLeave={() => setHovered(false)}
     >
       <ShapeGeometry type={shape.type} width={w} height={h} style={svgStyle} />
-
-      {/* selection ring */}
-      {isSelected && (
-        <ShapeGeometry
-          type={shape.type}
-          width={w}
-          height={h}
-          style={{
-            fill: "none",
-            stroke: "#4f8ef7",
-            strokeWidth: 2,
-            strokeDasharray: "none",
-          }}
-        />
-      )}
 
       <ConnectionHandles
         width={w}
