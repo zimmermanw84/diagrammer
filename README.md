@@ -79,6 +79,21 @@ The backend exposes a minimal REST API at `http://localhost:3001/api/v1`:
 
 The `POST /export/vsdx` body must be a valid `DiagramDocument` (defined in `@diagrammer/shared`). Returns a binary `.vsdx` file on success, or a JSON error envelope on failure.
 
+### Export pipeline
+
+```
+DiagramDocument (JSON)
+  └─► DiagramMapper.toVsdx()   packages/backend/src/services/DiagramMapper.ts
+        └─► ts-visio             builds the OPC/OOXML .vsdx package in memory
+              └─► Buffer          returned as application/vnd.ms-visio.drawing
+```
+
+**Shape types** — all six schema types are supported: `rectangle`, `ellipse`, `diamond`, `rounded_rectangle`, `triangle`, `parallelogram`.
+
+**Connectors** — straight, right-angle (orthogonal), and curved routing; arrow head types: `none`, `open`, `filled` (solid triangle), `crowsfoot`, `one`.
+
+**Coordinate system** — the schema stores shapes with `(x, y)` as the **top-left corner in inches** using an SVG-style top-down Y axis. `DiagramMapper` converts to Visio's center-pin / Y-up coordinate system internally.
+
 ## Project Structure
 
 ```
@@ -94,7 +109,8 @@ diagrammer/
 │       └── src/
 │           ├── index.ts
 │           ├── routes/
-│           └── middleware/
+│           ├── middleware/
+│           └── services/    # DiagramMapper — converts DiagramDocument → .vsdx
 ├── package.json         # Workspace root — shared scripts and devDependencies
 ├── tsconfig.base.json   # Shared TypeScript config (strict mode)
 └── eslint.config.js     # Shared ESLint config (typescript-eslint + react-hooks)
