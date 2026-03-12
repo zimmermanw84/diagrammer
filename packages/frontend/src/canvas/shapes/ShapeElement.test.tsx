@@ -43,11 +43,10 @@ describe("ShapeElement", () => {
     expect(onSelect).toHaveBeenCalledWith("shape-1");
   });
 
-  it("shows selection ring when isSelected", () => {
+  it("renders the shape geometry when isSelected", () => {
     const { container } = renderShape({ isSelected: true });
-    const rects = container.querySelectorAll("rect");
-    // Two rects: shape + selection ring
-    expect(rects.length).toBeGreaterThanOrEqual(2);
+    // Selection ring is now handled by SelectionOverlay, not ShapeElement
+    expect(container.querySelector("rect")).toBeTruthy();
   });
 
   it("enters edit mode on double-click and shows input", () => {
