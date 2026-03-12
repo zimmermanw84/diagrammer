@@ -1,5 +1,6 @@
 import { createEmptyDocument } from "@diagrammer/shared";
 import { DiagramProvider } from "./state/index.js";
+import { Canvas } from "./canvas/Canvas";
 
 const doc = createEmptyDocument("My Diagram");
 
@@ -13,11 +14,7 @@ export function App() {
       </div>
 
       <div style={styles.canvas}>
-        <span style={styles.canvasLabel}>
-          Canvas — T06
-          <br />
-          <small>{doc.meta.title} · {doc.pages[0]?.width}" × {doc.pages[0]?.height}"</small>
-        </span>
+        <Canvas page={doc.pages[0]!} />
       </div>
 
       <div style={styles.properties}>
@@ -44,15 +41,8 @@ const styles: Record<string, React.CSSProperties> = {
     borderRight: "1px solid #313244",
   },
   canvas: {
-    background: "#f8f8f2",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    color: "#6c6f85",
-  },
-  canvasLabel: {
-    textAlign: "center",
-    lineHeight: 2,
+    overflow: "hidden",
+    position: "relative",
   },
   properties: {
     background: "#1e1e2e",
