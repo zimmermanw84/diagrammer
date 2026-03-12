@@ -3,6 +3,7 @@ import type {
   DiagramConnector,
   DiagramPage,
   ShapeStyle,
+  ConnectorStyle,
 } from "@diagrammer/shared";
 
 export type DiagramAction =
@@ -18,4 +19,5 @@ export type DiagramAction =
   | { type: "DELETE_CONNECTOR"; payload: { id: string } }
   | { type: "ADD_PAGE"; payload: Omit<DiagramPage, "id" | "shapes" | "connectors"> }
   | { type: "SET_ACTIVE_PAGE"; payload: { pageId: string } }
-  | { type: "SELECT"; payload: { id: string | null } };
+  | { type: "SELECT"; payload: { id: string | null } }
+  | { type: "UPDATE_CONNECTOR_STYLE"; payload: { id: string; style: Partial<ConnectorStyle> } };

@@ -6,6 +6,7 @@ import { ConnectorLayer } from "./canvas/connectors/ConnectorLayer.js";
 import { ConnectorDrawing, resolveConnectionPoint } from "./canvas/ConnectorDrawing.js";
 import { SelectionOverlay } from "./canvas/SelectionOverlay.js";
 import { useKeyboardShortcuts } from "./canvas/useKeyboardShortcuts.js";
+import { PropertiesPanel } from "./properties/PropertiesPanel.js";
 import { DEFAULT_CONNECTOR_STYLE } from "@diagrammer/shared";
 import type { InProgress } from "./canvas/ConnectorDrawing.js";
 import type { ConnectionPoint } from "./canvas/shapes/ConnectionHandles.js";
@@ -93,8 +94,7 @@ function DiagramEditor() {
       </div>
 
       <div style={styles.properties}>
-        <strong>Properties</strong>
-        <p style={styles.hint}>Shape properties — T10</p>
+        <PropertiesPanel />
       </div>
     </div>
   );
@@ -131,6 +131,7 @@ const styles: Record<string, React.CSSProperties> = {
     color: "#cdd6f4",
     padding: "16px",
     borderLeft: "1px solid #313244",
+    overflowY: "auto",
   },
   hint: {
     color: "#6c6f85",
