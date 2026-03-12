@@ -222,6 +222,22 @@ export function diagramReducer(state: State, action: DiagramAction): State {
       return { ...state, selection: action.payload.id };
     }
 
+    case "UPDATE_CONNECTOR_STYLE": {
+      const { id, style } = action.payload;
+      return {
+        ...state,
+        document: {
+          ...state.document,
+          pages: updatePage(state.document.pages, state.activePageId, (page) => ({
+            ...page,
+            connectors: page.connectors.map((c) =>
+              c.id === id ? { ...c, style: { ...c.style, ...style } } : c
+            ),
+          })),
+        },
+      };
+    }
+
     default:
       return state;
   }

@@ -7,6 +7,6 @@ describe("App", () => {
     render(<App />);
     expect(screen.getByText("Toolbar")).toBeDefined();
     expect(document.querySelector("svg")).toBeDefined();
-    expect(screen.getByText("Properties")).toBeDefined();
+    expect(screen.getByText("Select a shape to edit its properties")).toBeDefined();
   });
 });
