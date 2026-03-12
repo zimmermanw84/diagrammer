@@ -17,7 +17,7 @@ import {
 function makeShape(overrides: Record<string, unknown> = {}) {
   return {
     id: crypto.randomUUID(),
-    type: "rectangle",
+    type: "rectangle" as const,
     x: 1,
     y: 1,
     width: 2,
@@ -36,7 +36,7 @@ function makeConnector(fromShapeId: string, toShapeId: string, overrides: Record
     toShapeId,
     label: "",
     style: { ...DEFAULT_CONNECTOR_STYLE },
-    routing: "straight",
+    routing: "straight" as const,
     ...overrides,
   };
 }
