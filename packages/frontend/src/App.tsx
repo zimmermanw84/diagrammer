@@ -1,9 +1,11 @@
 import { createEmptyDocument } from "@diagrammer/shared";
+import { DiagramProvider } from "./state/index.js";
 
 const doc = createEmptyDocument("My Diagram");
 
 export function App() {
   return (
+    <DiagramProvider>
     <div style={styles.shell}>
       <div style={styles.toolbar}>
         <strong>Toolbar</strong>
@@ -23,6 +25,7 @@ export function App() {
         <p style={styles.hint}>Shape properties — T10</p>
       </div>
     </div>
+    </DiagramProvider>
   );
 }
 
