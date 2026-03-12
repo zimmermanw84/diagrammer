@@ -7,6 +7,8 @@ interface CanvasProps {
   page: DiagramPage;
   children?: React.ReactNode;
   onDeselect?: () => void;
+  svgRef?: React.RefObject<SVGSVGElement | null>;
+  onTransformChange?: (t: Transform) => void;
 }
 
 interface Transform {
@@ -19,8 +21,9 @@ const MIN_SCALE = 0.1;
 const MAX_SCALE = 8;
 const ZOOM_SENSITIVITY = 0.001;
 
-export function Canvas({ page, children, onDeselect }: CanvasProps) {
-  const svgRef = useRef<SVGSVGElement>(null);
+export function Canvas({ page, children, onDeselect, svgRef: externalRef, onTransformChange }: CanvasProps) {
+  const internalRef = useRef<SVGSVGElement>(null);
+  const svgRef = externalRef ?? internalRef;
   const [transform, setTransform] = useState<Transform>({ scale: 1, x: 0, y: 0 });
 
   // Track space key for pan mode
@@ -57,11 +60,13 @@ export function Canvas({ page, children, onDeselect }: CanvasProps) {
       const delta = -e.deltaY * ZOOM_SENSITIVITY;
       const nextScale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, prev.scale * (1 + delta)));
       const ratio = nextScale / prev.scale;
-      return {
+      const next = {
         scale: nextScale,
         x: cx - ratio * (cx - prev.x),
         y: cy - ratio * (cy - prev.y),
       };
+      onTransformChange?.(next);
+      return next;
     });
   }, []);
 

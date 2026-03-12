@@ -3,6 +3,8 @@ import type { DiagramShape, ShapeStyle } from "@diagrammer/shared";
 import { toPixels } from "../units.js";
 import { ShapeGeometry } from "./ShapeGeometry.js";
 import { toSvgStyle } from "./shapeStyle.js";
+import { ConnectionHandles } from "./ConnectionHandles.js";
+import type { ConnectionPoint } from "./ConnectionHandles.js";
 
 interface ShapeElementProps {
   shape: DiagramShape;
@@ -10,6 +12,7 @@ interface ShapeElementProps {
   onSelect: (id: string) => void;
   onMove: (id: string, dx: number, dy: number) => void;
   onLabelChange: (id: string, label: string) => void;
+  onStartConnect: (shapeId: string, point: ConnectionPoint) => void;
 }
 
 export function ShapeElement({
@@ -18,6 +21,7 @@ export function ShapeElement({
   onSelect,
   onMove,
   onLabelChange,
+  onStartConnect,
 }: ShapeElementProps) {
   const x = toPixels(shape.x);
   const y = toPixels(shape.y);
@@ -26,6 +30,7 @@ export function ShapeElement({
 
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(shape.label);
+  const [hovered, setHovered] = useState(false);
   const dragOrigin = useRef<{ mx: number; my: number; sx: number; sy: number } | null>(null);
 
   const svgStyle = toSvgStyle(shape.style);
@@ -82,6 +87,8 @@ export function ShapeElement({
       style={{ cursor: editing ? "text" : "move" }}
       onMouseDown={onMouseDown}
       onDoubleClick={onDoubleClick}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
     >
       <ShapeGeometry type={shape.type} width={w} height={h} style={svgStyle} />
 
@@ -99,6 +106,13 @@ export function ShapeElement({
           }}
         />
       )}
+
+      <ConnectionHandles
+        width={w}
+        height={h}
+        visible={hovered && !editing}
+        onStartConnect={(pt) => onStartConnect(shape.id, pt)}
+      />
 
       {/* label */}
       {editing ? (
