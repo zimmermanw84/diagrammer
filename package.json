@@ -5,7 +5,7 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "npm run dev --workspaces --if-present",
+    "dev": "concurrently --names shared,frontend,backend --prefix-colors cyan,magenta,yellow \"npm run dev -w @diagrammer/shared\" \"npm run dev -w @diagrammer/frontend\" \"npm run dev -w @diagrammer/backend\"",
     "build": "npm run build --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
     "lint": "eslint packages/*/src"
@@ -13,6 +13,7 @@
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^8.0.0",
     "@typescript-eslint/parser": "^8.0.0",
+    "concurrently": "^9.2.1",
     "eslint": "^9.0.0",
     "eslint-plugin-react": "^7.37.0",
     "eslint-plugin-react-hooks": "^5.0.0",
