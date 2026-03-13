@@ -402,6 +402,28 @@ describe("RESET", () => {
   });
 });
 
+describe("SET_DEFAULT_CONNECTOR_STYLE", () => {
+  it("merges the patch into defaultConnectorStyle", () => {
+    let state = createInitialState();
+    state = dispatch(state, { type: "SET_DEFAULT_CONNECTOR_STYLE", payload: { strokeDash: "dashed" } });
+    expect(state.defaultConnectorStyle.strokeDash).toBe("dashed");
+  });
+
+  it("does not clobber other fields", () => {
+    let state = createInitialState();
+    state = dispatch(state, { type: "SET_DEFAULT_CONNECTOR_STYLE", payload: { arrowEnd: "open" } });
+    expect(state.defaultConnectorStyle.strokeColor).toBe(state.defaultConnectorStyle.strokeColor);
+    expect(state.defaultConnectorStyle.arrowEnd).toBe("open");
+  });
+
+  it("is excluded from undo history", () => {
+    let state = createInitialHistoryState();
+    state = hdispatch(state, { type: "SET_DEFAULT_CONNECTOR_STYLE", payload: { strokeDash: "dotted" } });
+    expect(state.past).toHaveLength(0);
+    expect(state.defaultConnectorStyle.strokeDash).toBe("dotted");
+  });
+});
+
 describe("RENAME_PAGE", () => {
   it("updates the page name", () => {
     let state = createInitialState();

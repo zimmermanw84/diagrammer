@@ -25,4 +25,5 @@ export type DiagramAction =
   | { type: "UPDATE_CONNECTOR_STYLE"; payload: { id: string; style: Partial<ConnectorStyle> } }
   | { type: "RESET" }
   | { type: "UNDO" }
-  | { type: "REDO" };
+  | { type: "REDO" }
+  | { type: "SET_DEFAULT_CONNECTOR_STYLE"; payload: Partial<ConnectorStyle> };

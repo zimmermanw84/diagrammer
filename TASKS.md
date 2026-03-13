@@ -364,15 +364,15 @@ A minor UX improvement: let the user choose the filename before downloading the 
 The connector schema already supports `strokeDash`, `arrowStart`, and `arrowEnd`, and the Properties Panel lets you edit these on a selected connector. However, there is no way to choose the line style or arrowhead type *before* drawing a connector, and arrowhead markers may not be rendering visibly with the default style.
 
 **Arrowhead rendering:**
-- [ ] Audit SVG `<marker>` / `<defs>` setup in `ConnectorElement` — verify all five `ArrowHeadType` values (`none`, `open`, `filled`, `crowsfoot`, `one`) render correctly at typical zoom levels
-- [ ] Fix any marker sizing, `refX`/`refY`, or `markerUnits` issues that cause arrows to appear invisible or misaligned
+- [x] Audit SVG `<marker>` / `<defs>` setup in `ConnectorElement` — verify all five `ArrowHeadType` values (`none`, `open`, `filled`, `crowsfoot`, `one`) render correctly at typical zoom levels
+- [x] Fix any marker sizing, `refX`/`refY`, or `markerUnits` issues that cause arrows to appear invisible or misaligned
 
 **Default connector style picker:**
-- [ ] Add a "Connector style" section to the toolbar (below the shape libraries) with compact controls for the *default* line style and arrowhead to apply to the next drawn connector
-- [ ] Store the active default connector style in UI state (not in `DiagramDocument`) — e.g., `defaultConnectorStyle: Partial<ConnectorStyle>` alongside `selection` in the reducer's `State`
-- [ ] When `ADD_CONNECTOR` is dispatched from `ConnectorDrawing`, merge the active default style into the payload
-- [ ] Controls: stroke-dash toggle (solid / dashed / dotted), arrowhead-end select (none / open / filled)
-- [ ] Add tests: default style is applied to newly created connectors; changing the default does not affect existing connectors
+- [x] Add a "Connector style" section to the toolbar (below the shape libraries) with compact controls for the *default* line style and arrowhead to apply to the next drawn connector
+- [x] Store the active default connector style in UI state (not in `DiagramDocument`) — e.g., `defaultConnectorStyle: Partial<ConnectorStyle>` alongside `selection` in the reducer's `State`
+- [x] When `ADD_CONNECTOR` is dispatched from `ConnectorDrawing`, merge the active default style into the payload
+- [x] Controls: stroke-dash toggle (solid / dashed / dotted), arrowhead-end select (none / open / filled)
+- [x] Add tests: default style is applied to newly created connectors; changing the default does not affect existing connectors
 
 ---
 

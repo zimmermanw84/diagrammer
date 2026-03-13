@@ -7,10 +7,11 @@ import { ConnectorDrawing, resolveConnectionPoint } from "./canvas/ConnectorDraw
 import { SelectionOverlay } from "./canvas/SelectionOverlay.js";
 import { useKeyboardShortcuts } from "./canvas/useKeyboardShortcuts.js";
 import { PropertiesPanel } from "./properties/PropertiesPanel.js";
-import { DEFAULT_CONNECTOR_STYLE, DEFAULT_SHAPE_STYLE } from "@diagrammer/shared";
+import { DEFAULT_SHAPE_STYLE } from "@diagrammer/shared";
 import type { ShapeType } from "@diagrammer/shared";
 import { ShapePalette } from "./toolbar/ShapePalette.js";
 import { PageTabBar } from "./canvas/PageTabBar.js";
+import { ConnectorDefaults } from "./toolbar/ConnectorDefaults.js";
 import { ExportButton } from "./toolbar/ExportButton.js";
 import { OfflineBanner } from "./toolbar/OfflineBanner.js";
 import { useHealthCheck } from "./toolbar/useHealthCheck.js";
@@ -51,7 +52,7 @@ function DiagramEditor() {
         fromShapeId,
         toShapeId,
         label: "",
-        style: { ...DEFAULT_CONNECTOR_STYLE },
+        style: { ...state.defaultConnectorStyle },
         routing: "straight",
       },
     });
@@ -80,6 +81,10 @@ function DiagramEditor() {
                 },
               })
             }
+          />
+          <ConnectorDefaults
+            style={state.defaultConnectorStyle}
+            onChange={(patch) => dispatch({ type: "SET_DEFAULT_CONNECTOR_STYLE", payload: patch })}
           />
           <div style={styles.toolbarActions}>
             <div style={styles.undoRedoRow}>

@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, fireEvent } from "@testing-library/react";
-import { ConnectorElement } from "./ConnectorElement.js";
+import { ConnectorElement, shapeEdgePoint } from "./ConnectorElement.js";
 import { DEFAULT_CONNECTOR_STYLE } from "@diagrammer/shared";
 import type { RoutingAlgorithm, ArrowHeadType } from "@diagrammer/shared";
 import { makeShape, makeConnector } from "../../test-utils/fixtures.js";
@@ -50,10 +50,85 @@ describe("ConnectorElement", () => {
     expect(container.querySelector("text")).toBeNull();
   });
 
+  it("path does not start at the shape center (arrowheads are on shape borders)", () => {
+    // fromShape center at pixels(1+2/2, 1+1/2) = pixels(2, 1.5)
+    // toShape at x=3, so center at pixels(3+2/2, 1+1/2) = pixels(4, 1.5)
+    // Path should start at fromShape's RIGHT edge, not its center
+    const { container } = renderConnector({
+      fromShape: makeShape({ id: "s1", x: 1, y: 1, width: 2, height: 1 }),
+      toShape: makeShape({ id: "s2", x: 3, y: 1, width: 2, height: 1 }),
+    });
+    const paths = container.querySelectorAll("path");
+    // The visible path's d attribute should NOT start at center px coords
+    const visiblePath = paths[1]!; // [0]=hit area, [1]=visible
+    const d = visiblePath.getAttribute("d") ?? "";
+    // Center of fromShape = toPixels(2) = 192px; right edge = toPixels(3) = 288px
+    // Path should start near 288, not 192
+    expect(d).toContain("288");
+  });
+
   it("renders selection highlight when isSelected", () => {
     const { container } = renderConnector({ isSelected: true });
     const paths = container.querySelectorAll("path");
     // hit area + visible + selection highlight = 3
     expect(paths.length).toBeGreaterThanOrEqual(3);
+  });
+
+  it("path does not start at the shape center (arrowheads are on shape borders)", () => {
+    // fromShape center at pixels(1+2/2, 1+1/2) = pixels(2, 1.5)
+    // toShape at x=3, so center at pixels(3+2/2, 1+1/2) = pixels(4, 1.5)
+    // Path should start at fromShape's RIGHT edge, not its center
+    const { container } = renderConnector({
+      fromShape: makeShape({ id: "s1", x: 1, y: 1, width: 2, height: 1 }),
+      toShape: makeShape({ id: "s2", x: 3, y: 1, width: 2, height: 1 }),
+    });
+    const paths = container.querySelectorAll("path");
+    // The visible path's d attribute should NOT start at center px coords
+    const visiblePath = paths[1]!; // [0]=hit area, [1]=visible
+    const d = visiblePath.getAttribute("d") ?? "";
+    // Center of fromShape = toPixels(2) = 192px; right edge = toPixels(3) = 288px
+    // Path should start near 288, not 192
+    expect(d).toContain("288");
+  });
+});
+
+describe("shapeEdgePoint", () => {
+  const PPI = 96;
+
+  it("returns the right edge when approaching from the right", () => {
+    // shape: x=0, y=0, width=2, height=2 → center=(1,1)in = (96,96)px, hw=96, hh=96
+    const shape = makeShape({ x: 0, y: 0, width: 2, height: 2 });
+    const pt = shapeEdgePoint(shape, 500, 96); // towardX well to the right, same y as center
+    expect(pt.x).toBeCloseTo(2 * PPI); // right edge
+    expect(pt.y).toBeCloseTo(1 * PPI); // center y
+  });
+
+  it("returns the left edge when approaching from the left", () => {
+    const shape = makeShape({ x: 0, y: 0, width: 2, height: 2 });
+    const pt = shapeEdgePoint(shape, -100, 96);
+    expect(pt.x).toBeCloseTo(0);       // left edge
+    expect(pt.y).toBeCloseTo(1 * PPI);
+  });
+
+  it("returns the top edge when approaching from above", () => {
+    const shape = makeShape({ x: 0, y: 0, width: 2, height: 2 });
+    const pt = shapeEdgePoint(shape, 96, -100);
+    expect(pt.x).toBeCloseTo(1 * PPI); // center x
+    expect(pt.y).toBeCloseTo(0);       // top edge
+  });
+
+  it("returns the bottom edge when approaching from below", () => {
+    const shape = makeShape({ x: 0, y: 0, width: 2, height: 2 });
+    const pt = shapeEdgePoint(shape, 96, 500);
+    expect(pt.x).toBeCloseTo(1 * PPI);
+    expect(pt.y).toBeCloseTo(2 * PPI); // bottom edge
+  });
+
+  it("handles a diagonal approach and hits the correct edge", () => {
+    // 2×1 shape: center=(96, 48)px, hw=96, hh=48
+    // Approaching from far right, slightly below: tx < ty → right edge hit
+    const shape = makeShape({ x: 0, y: 0, width: 2, height: 1 });
+    const pt = shapeEdgePoint(shape, 10000, 50); // nearly horizontal
+    expect(pt.x).toBeCloseTo(2 * PPI); // right edge
   });
 });

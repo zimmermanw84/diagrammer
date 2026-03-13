@@ -1,28 +1,43 @@
-import type { DiagramDocument, DiagramPage } from "@diagrammer/shared";
-import { createEmptyDocument } from "@diagrammer/shared";
+import type { DiagramDocument, DiagramPage, ConnectorStyle } from "@diagrammer/shared";
+import { createEmptyDocument, DEFAULT_CONNECTOR_STYLE } from "@diagrammer/shared";
 import type { DiagramAction } from "./actions.js";
 import { loadSavedDocument } from "./persistence.js";
 
 const MAX_HISTORY = 50;
 
 // Actions that only affect UI state — excluded from undo history
-const EPHEMERAL_ACTIONS = new Set<DiagramAction["type"]>(["SELECT", "SET_ACTIVE_PAGE"]);
+const EPHEMERAL_ACTIONS = new Set<DiagramAction["type"]>([
+  "SELECT",
+  "SET_ACTIVE_PAGE",
+  "SET_DEFAULT_CONNECTOR_STYLE",
+]);
 
 export interface State {
   document: DiagramDocument;
   activePageId: string;
   selection: string | null;
+  defaultConnectorStyle: ConnectorStyle;
 }
 
 export function createFreshState(): State {
   const document = createEmptyDocument();
-  return { document, activePageId: document.pages[0]!.id, selection: null };
+  return {
+    document,
+    activePageId: document.pages[0]!.id,
+    selection: null,
+    defaultConnectorStyle: { ...DEFAULT_CONNECTOR_STYLE },
+  };
 }
 
 export function createInitialState(): State {
   const saved = loadSavedDocument();
   if (saved) {
-    return { document: saved, activePageId: saved.pages[0]!.id, selection: null };
+    return {
+      document: saved,
+      activePageId: saved.pages[0]!.id,
+      selection: null,
+      defaultConnectorStyle: { ...DEFAULT_CONNECTOR_STYLE },
+    };
   }
   return createFreshState();
 }
@@ -281,6 +296,12 @@ export function diagramReducer(state: State, action: DiagramAction): State {
         },
       };
     }
+
+    case "SET_DEFAULT_CONNECTOR_STYLE":
+      return {
+        ...state,
+        defaultConnectorStyle: { ...state.defaultConnectorStyle, ...action.payload },
+      };
 
     case "RESET":
       return createFreshState();
