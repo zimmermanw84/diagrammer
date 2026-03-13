@@ -10,6 +10,19 @@ A client-side diagram editor with Visio export, built with TypeScript and React.
 | `@diagrammer/frontend` | React/Vite SVG-based diagram editor |
 | `@diagrammer/backend` | Express API that exports diagrams as `.vsdx` files via ts-visio |
 
+## Features
+
+- **Shape palette** — drag rectangle, ellipse, diamond, rounded rectangle, triangle, or parallelogram onto the canvas
+- **Canvas** — infinite SVG canvas with zoom (scroll wheel) and pan (space+drag or middle-click+drag)
+- **Selection** — click to select; resize with 8 handles; delete with the Delete key
+- **Connectors** — drag from a shape's N/E/S/W handle to another shape; straight, right-angle, and curved routing
+- **Label editing** — double-click any shape or connector to edit inline
+- **Properties panel** — edit fill, stroke, font, and custom key-value properties for the selected element
+- **Local persistence** — diagram auto-saves to `localStorage` (debounced 300 ms); restored on page reload
+- **New Diagram** — clears the canvas after a confirmation prompt
+- **Export to Visio** — one-click export of the full diagram as a `.vsdx` file via the backend
+- **Offline banner** — frontend polls the backend health endpoint every 5 s and shows a warning banner + disables export if unreachable
+
 ## Prerequisites
 
 - **Node 20** (pinned via `.nvmrc` — run `nvm use` if you use nvm)
@@ -41,6 +54,14 @@ Or run a single package:
 npm run dev -w @diagrammer/frontend
 npm run dev -w @diagrammer/backend
 ```
+
+### Environment variables
+
+| Variable | Default | Description |
+|---|---|---|
+| `VITE_API_URL` | `http://localhost:3001` | Backend base URL used by the frontend for export and health polling |
+| `PORT` | `3001` | Port the backend listens on |
+| `ALLOWED_ORIGIN` | `http://localhost:5173` | CORS allowed origin for the backend |
 
 ## Testing
 
@@ -99,21 +120,27 @@ DiagramDocument (JSON)
 ```
 diagrammer/
 ├── packages/
-│   ├── shared/          # @diagrammer/shared — Zod schema + TypeScript types
+│   ├── shared/              # @diagrammer/shared — Zod schema + TypeScript types
 │   │   └── src/
 │   │       └── schema.ts
-│   ├── frontend/        # @diagrammer/frontend — React/Vite editor
+│   ├── frontend/            # @diagrammer/frontend — React/Vite editor
 │   │   └── src/
-│   │       └── App.tsx
-│   └── backend/         # @diagrammer/backend — Express export API
+│   │       ├── App.tsx
+│   │       ├── state/       # useReducer + DiagramProvider context + localStorage persistence
+│   │       ├── canvas/      # SVG canvas, zoom/pan, shape/connector layers, selection overlay
+│   │       │   ├── shapes/
+│   │       │   └── connectors/
+│   │       ├── toolbar/     # Shape palette, export button, health check hook, offline banner
+│   │       └── properties/  # Properties panel (style editor, connector editor, custom props)
+│   └── backend/             # @diagrammer/backend — Express export API
 │       └── src/
 │           ├── index.ts
 │           ├── routes/
 │           ├── middleware/
 │           └── services/    # DiagramMapper — converts DiagramDocument → .vsdx
-├── package.json         # Workspace root — shared scripts and devDependencies
-├── tsconfig.base.json   # Shared TypeScript config (strict mode)
-└── eslint.config.js     # Shared ESLint config (typescript-eslint + react-hooks)
+├── package.json             # Workspace root — shared scripts and devDependencies
+├── tsconfig.base.json       # Shared TypeScript config (strict mode)
+└── eslint.config.js         # Shared ESLint config (typescript-eslint + react-hooks)
 ```
 
 ## Architecture
