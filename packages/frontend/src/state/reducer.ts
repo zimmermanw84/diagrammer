@@ -3,6 +3,11 @@ import { createEmptyDocument } from "@diagrammer/shared";
 import type { DiagramAction } from "./actions.js";
 import { loadSavedDocument } from "./persistence.js";
 
+const MAX_HISTORY = 50;
+
+// Actions that only affect UI state — excluded from undo history
+const EPHEMERAL_ACTIONS = new Set<DiagramAction["type"]>(["SELECT", "SET_ACTIVE_PAGE"]);
+
 export interface State {
   document: DiagramDocument;
   activePageId: string;
@@ -253,4 +258,74 @@ export function diagramReducer(state: State, action: DiagramAction): State {
     default:
       return state;
   }
+}
+
+// ---------------------------------------------------------------------------
+// History wrapper
+// ---------------------------------------------------------------------------
+
+export interface HistoryState extends State {
+  past: DiagramDocument[];
+  future: DiagramDocument[];
+}
+
+export function createInitialHistoryState(): HistoryState {
+  return { ...createInitialState(), past: [], future: [] };
+}
+
+export function historyReducer(state: HistoryState, action: DiagramAction): HistoryState {
+  if (action.type === "UNDO") {
+    if (state.past.length === 0) return state;
+    const previous = state.past[state.past.length - 1]!;
+    const newPast = state.past.slice(0, -1);
+    // If activePageId no longer exists in the restored document, fall back to page 0
+    const validPageId = previous.pages.some((p) => p.id === state.activePageId)
+      ? state.activePageId
+      : previous.pages[0]!.id;
+    return {
+      ...state,
+      document: previous,
+      activePageId: validPageId,
+      past: newPast,
+      future: [state.document, ...state.future],
+    };
+  }
+
+  if (action.type === "REDO") {
+    if (state.future.length === 0) return state;
+    const next = state.future[0]!;
+    const newFuture = state.future.slice(1);
+    const validPageId = next.pages.some((p) => p.id === state.activePageId)
+      ? state.activePageId
+      : next.pages[0]!.id;
+    return {
+      ...state,
+      document: next,
+      activePageId: validPageId,
+      past: [...state.past, state.document],
+      future: newFuture,
+    };
+  }
+
+  if (action.type === "RESET") {
+    return { ...createFreshState(), past: [], future: [] };
+  }
+
+  const nextState = diagramReducer(state, action);
+
+  // Ephemeral UI actions don't push to history
+  if (EPHEMERAL_ACTIONS.has(action.type)) {
+    return { ...nextState, past: state.past, future: state.future };
+  }
+
+  // Only record history if the document actually changed
+  if (nextState.document === state.document) {
+    return { ...nextState, past: state.past, future: state.future };
+  }
+
+  return {
+    ...nextState,
+    past: [...state.past, state.document].slice(-MAX_HISTORY),
+    future: [],
+  };
 }

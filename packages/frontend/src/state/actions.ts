@@ -21,4 +21,6 @@ export type DiagramAction =
   | { type: "SET_ACTIVE_PAGE"; payload: { pageId: string } }
   | { type: "SELECT"; payload: { id: string | null } }
   | { type: "UPDATE_CONNECTOR_STYLE"; payload: { id: string; style: Partial<ConnectorStyle> } }
-  | { type: "RESET" };
+  | { type: "RESET" }
+  | { type: "UNDO" }
+  | { type: "REDO" };

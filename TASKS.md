@@ -286,10 +286,10 @@ These are independent of each other and can be picked up in any order after Phas
 ### T17 · Undo / Redo
 **Depends on:** T05 (modify reducer)
 
-- [ ] Wrap reducer with `past[]` / `future[]` stacks (cap past at 50)
-- [ ] Add `UNDO` and `REDO` actions
-- [ ] Wire `Cmd/Ctrl+Z` and `Cmd/Ctrl+Y` via global keydown listener
-- [ ] Add Undo/Redo buttons to Toolbar (disabled when stack is empty)
+- [x] Wrap reducer with `past[]` / `future[]` stacks (cap past at 50)
+- [x] Add `UNDO` and `REDO` actions
+- [x] Wire `Cmd/Ctrl+Z` and `Cmd/Ctrl+Y` via global keydown listener
+- [x] Add Undo/Redo buttons to Toolbar (disabled when stack is empty)
 
 ---
 

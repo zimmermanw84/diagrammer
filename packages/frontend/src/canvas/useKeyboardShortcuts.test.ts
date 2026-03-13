@@ -61,4 +61,67 @@ describe("useKeyboardShortcuts", () => {
     fireEvent.keyDown(document.body, { key: "Delete" });
     expect(dispatch).not.toHaveBeenCalled();
   });
+
+  it("dispatches UNDO on Cmd+Z", () => {
+    const dispatch = vi.fn();
+    renderHook(() => useKeyboardShortcuts({
+      selection: null,
+      shapes: [],
+      connectors: [],
+      dispatch,
+    }));
+    fireEvent.keyDown(document.body, { key: "z", metaKey: true });
+    expect(dispatch).toHaveBeenCalledWith({ type: "UNDO" });
+  });
+
+  it("dispatches UNDO on Ctrl+Z", () => {
+    const dispatch = vi.fn();
+    renderHook(() => useKeyboardShortcuts({
+      selection: null,
+      shapes: [],
+      connectors: [],
+      dispatch,
+    }));
+    fireEvent.keyDown(document.body, { key: "z", ctrlKey: true });
+    expect(dispatch).toHaveBeenCalledWith({ type: "UNDO" });
+  });
+
+  it("dispatches REDO on Cmd+Y", () => {
+    const dispatch = vi.fn();
+    renderHook(() => useKeyboardShortcuts({
+      selection: null,
+      shapes: [],
+      connectors: [],
+      dispatch,
+    }));
+    fireEvent.keyDown(document.body, { key: "y", metaKey: true });
+    expect(dispatch).toHaveBeenCalledWith({ type: "REDO" });
+  });
+
+  it("dispatches REDO on Cmd+Shift+Z", () => {
+    const dispatch = vi.fn();
+    renderHook(() => useKeyboardShortcuts({
+      selection: null,
+      shapes: [],
+      connectors: [],
+      dispatch,
+    }));
+    fireEvent.keyDown(document.body, { key: "z", metaKey: true, shiftKey: true });
+    expect(dispatch).toHaveBeenCalledWith({ type: "REDO" });
+  });
+
+  it("does not dispatch UNDO when target is an input", () => {
+    const dispatch = vi.fn();
+    renderHook(() => useKeyboardShortcuts({
+      selection: null,
+      shapes: [],
+      connectors: [],
+      dispatch,
+    }));
+    const input = document.createElement("input");
+    document.body.appendChild(input);
+    fireEvent.keyDown(input, { key: "z", metaKey: true });
+    document.body.removeChild(input);
+    expect(dispatch).not.toHaveBeenCalled();
+  });
 });

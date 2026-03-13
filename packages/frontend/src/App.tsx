@@ -19,7 +19,7 @@ import type { InProgress } from "./canvas/ConnectorDrawing.js";
 import type { ConnectionPoint } from "./canvas/shapes/ConnectionHandles.js";
 
 function DiagramEditor() {
-  const { state, dispatch } = useDiagram();
+  const { state, dispatch, canUndo, canRedo } = useDiagram();
   const activePage = (
     state.document.pages.find((p) => p.id === state.activePageId) ?? state.document.pages[0]
   )!;
@@ -81,6 +81,24 @@ function DiagramEditor() {
             }
           />
           <div style={styles.toolbarActions}>
+            <div style={styles.undoRedoRow}>
+              <button
+                style={{ ...styles.undoRedoButton, ...(canUndo ? {} : styles.undoRedoDisabled) }}
+                onClick={() => dispatch({ type: "UNDO" })}
+                disabled={!canUndo}
+                title="Undo (Cmd/Ctrl+Z)"
+              >
+                Undo
+              </button>
+              <button
+                style={{ ...styles.undoRedoButton, ...(canRedo ? {} : styles.undoRedoDisabled) }}
+                onClick={() => dispatch({ type: "REDO" })}
+                disabled={!canRedo}
+                title="Redo (Cmd/Ctrl+Y)"
+              >
+                Redo
+              </button>
+            </div>
             <ExportButton doc={state.document} disabled={!isOnline} />
             <button
               style={styles.newButton}
@@ -172,6 +190,24 @@ const styles: Record<string, React.CSSProperties> = {
     display: "flex",
     flexDirection: "column",
     gap: "6px",
+  },
+  undoRedoRow: {
+    display: "grid",
+    gridTemplateColumns: "1fr 1fr",
+    gap: "4px",
+  },
+  undoRedoButton: {
+    padding: "6px 4px",
+    borderRadius: "6px",
+    border: `1px solid ${THEME.surface1}`,
+    background: "transparent",
+    color: THEME.text,
+    fontSize: "12px",
+    cursor: "pointer",
+  },
+  undoRedoDisabled: {
+    color: THEME.surface1,
+    cursor: "not-allowed",
   },
   newButton: {
     width: "100%",
