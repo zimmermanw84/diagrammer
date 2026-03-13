@@ -4,16 +4,48 @@ import { toInches } from "../canvas/units.js";
 import { DEFAULT_SHAPE_SIZE } from "../canvas/canvasConstants.js";
 import { THEME } from "../theme.js";
 
-const SHAPES: { type: ShapeType; label: string }[] = [
-  { type: "rectangle", label: "Rectangle" },
-  { type: "ellipse", label: "Ellipse" },
-  { type: "diamond", label: "Diamond" },
-  { type: "rounded_rectangle", label: "Rounded" },
-  { type: "triangle", label: "Triangle" },
-  { type: "parallelogram", label: "Parallel" },
+// ---------------------------------------------------------------------------
+// Library data
+// ---------------------------------------------------------------------------
+
+export interface ShapeTemplate {
+  type: ShapeType;
+  label: string;
+}
+
+export interface ShapeLibrary {
+  name: string;
+  shapes: ShapeTemplate[];
+}
+
+export const LIBRARIES: ShapeLibrary[] = [
+  {
+    name: "Basic Shapes",
+    shapes: [
+      { type: "rectangle", label: "Rectangle" },
+      { type: "ellipse", label: "Ellipse" },
+      { type: "diamond", label: "Diamond" },
+      { type: "rounded_rectangle", label: "Rounded" },
+      { type: "triangle", label: "Triangle" },
+      { type: "parallelogram", label: "Parallel" },
+    ],
+  },
+  {
+    name: "Flowchart",
+    shapes: [
+      { type: "rectangle", label: "Process" },
+      { type: "diamond", label: "Decision" },
+      { type: "rounded_rectangle", label: "Terminator" },
+      { type: "parallelogram", label: "Data" },
+      { type: "ellipse", label: "Start/End" },
+    ],
+  },
 ];
 
-// Miniature SVG preview for each shape type — 40×30 viewBox
+// ---------------------------------------------------------------------------
+// Shape preview SVG
+// ---------------------------------------------------------------------------
+
 function ShapePreview({ type }: { type: ShapeType }) {
   const fill = THEME.surface0;
   const stroke = THEME.blue;
@@ -37,11 +69,19 @@ function ShapePreview({ type }: { type: ShapeType }) {
   }
 }
 
+// ---------------------------------------------------------------------------
+// Drag state
+// ---------------------------------------------------------------------------
+
 interface DragState {
   type: ShapeType;
   x: number;
   y: number;
 }
+
+// ---------------------------------------------------------------------------
+// ShapePalette
+// ---------------------------------------------------------------------------
 
 interface ShapePaletteProps {
   svgRef: React.RefObject<SVGSVGElement | null>;
@@ -53,6 +93,18 @@ export function ShapePalette({ svgRef, transform, onAddShape }: ShapePaletteProp
   const [drag, setDrag] = useState<DragState | null>(null);
   const dragRef = useRef<DragState | null>(null);
   dragRef.current = drag;
+
+  // All libraries start expanded
+  const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
+
+  const toggleLibrary = (name: string) => {
+    setCollapsed((prev) => {
+      const next = new Set(prev);
+      if (next.has(name)) next.delete(name);
+      else next.add(name);
+      return next;
+    });
+  };
 
   useEffect(() => {
     if (!drag) return;
@@ -73,7 +125,6 @@ export function ShapePalette({ svgRef, transform, onAddShape }: ShapePaletteProp
         const inchX = toInches(svgX) - DEFAULT_SHAPE_SIZE / 2;
         const inchY = toInches(svgY) - DEFAULT_SHAPE_SIZE / 2;
 
-        // Only place if the drop landed inside the SVG bounds
         if (
           e.clientX >= rect.left &&
           e.clientX <= rect.right &&
@@ -97,25 +148,42 @@ export function ShapePalette({ svgRef, transform, onAddShape }: ShapePaletteProp
 
   return (
     <div style={styles.palette}>
-      <div style={styles.heading}>Shapes</div>
-      <div style={styles.grid}>
-        {SHAPES.map(({ type, label }) => (
-          <div
-            key={type}
-            style={styles.tile}
-            onMouseDown={(e) => {
-              e.preventDefault();
-              setDrag({ type, x: e.clientX, y: e.clientY });
-            }}
-            title={label}
-          >
-            <svg viewBox="0 0 40 30" style={styles.preview}>
-              <ShapePreview type={type} />
-            </svg>
-            <span style={styles.tileLabel}>{label}</span>
+      {LIBRARIES.map((lib) => {
+        const isCollapsed = collapsed.has(lib.name);
+        return (
+          <div key={lib.name} style={styles.library}>
+            <button
+              style={styles.libraryHeader}
+              onClick={() => toggleLibrary(lib.name)}
+              aria-expanded={!isCollapsed}
+              aria-label={lib.name}
+            >
+              <span style={styles.libraryName}>{lib.name}</span>
+              <span style={styles.chevron}>{isCollapsed ? "▶" : "▼"}</span>
+            </button>
+            {!isCollapsed && (
+              <div style={styles.grid}>
+                {lib.shapes.map(({ type, label }) => (
+                  <div
+                    key={label}
+                    style={styles.tile}
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      setDrag({ type, x: e.clientX, y: e.clientY });
+                    }}
+                    title={label}
+                  >
+                    <svg viewBox="0 0 40 30" style={styles.preview}>
+                      <ShapePreview type={type} />
+                    </svg>
+                    <span style={styles.tileLabel}>{label}</span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
-        ))}
-      </div>
+        );
+      })}
 
       {/* Drag ghost */}
       {drag && (
@@ -139,21 +207,41 @@ const styles: Record<string, React.CSSProperties> = {
   palette: {
     display: "flex",
     flexDirection: "column",
-    gap: "8px",
+    gap: "4px",
     userSelect: "none",
+    overflowY: "auto",
   },
-  heading: {
+  library: {
+    display: "flex",
+    flexDirection: "column",
+  },
+  libraryHeader: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    width: "100%",
+    background: "transparent",
+    border: "none",
+    borderRadius: "4px",
+    padding: "4px 2px",
+    cursor: "pointer",
+    color: THEME.overlay2,
+  },
+  libraryName: {
     fontSize: "11px",
     fontWeight: 600,
     textTransform: "uppercase",
     letterSpacing: "0.08em",
+  },
+  chevron: {
+    fontSize: "8px",
     color: THEME.overlay2,
-    marginBottom: "4px",
   },
   grid: {
     display: "grid",
     gridTemplateColumns: "1fr 1fr",
     gap: "6px",
+    marginTop: "4px",
   },
   tile: {
     display: "flex",

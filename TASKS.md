@@ -317,10 +317,10 @@ These are independent of each other and can be picked up in any order after Phas
 ### T20 · Shape Libraries / Stencils
 **Depends on:** T16
 
-- [ ] Convert Toolbar into a collapsible Shape Library panel
-- [ ] Define library JSON format: `{ name: string, shapes: ShapeTemplate[] }`
-- [ ] Add built-in libraries: Basic Shapes, Flowchart
-- [ ] Render library sections as collapsible groups with miniature SVG tile previews
+- [x] Convert Toolbar into a collapsible Shape Library panel
+- [x] Define library JSON format: `{ name: string, shapes: ShapeTemplate[] }`
+- [x] Add built-in libraries: Basic Shapes, Flowchart
+- [x] Render library sections as collapsible groups with miniature SVG tile previews
 
 ---
 
@@ -354,6 +354,25 @@ A minor UX improvement: let the user choose the filename before downloading the 
 - [ ] Sanitize the value client-side (strip characters that are invalid in filenames: `/ \ : * ? " < > |`) before passing to `a.download`
 - [ ] Reflect the filename in the `Content-Disposition` header returned by the backend export route (the backend already sanitizes; the frontend name is only used for the anchor download attribute)
 - [ ] Add a test asserting the sanitized filename is applied to the `<a download>` attribute
+
+---
+
+### T25 · Connector Style Picker
+**Depends on:** T08
+**Parallelizable with:** T19, T22, T24
+
+The connector schema already supports `strokeDash`, `arrowStart`, and `arrowEnd`, and the Properties Panel lets you edit these on a selected connector. However, there is no way to choose the line style or arrowhead type *before* drawing a connector, and arrowhead markers may not be rendering visibly with the default style.
+
+**Arrowhead rendering:**
+- [ ] Audit SVG `<marker>` / `<defs>` setup in `ConnectorElement` — verify all five `ArrowHeadType` values (`none`, `open`, `filled`, `crowsfoot`, `one`) render correctly at typical zoom levels
+- [ ] Fix any marker sizing, `refX`/`refY`, or `markerUnits` issues that cause arrows to appear invisible or misaligned
+
+**Default connector style picker:**
+- [ ] Add a "Connector style" section to the toolbar (below the shape libraries) with compact controls for the *default* line style and arrowhead to apply to the next drawn connector
+- [ ] Store the active default connector style in UI state (not in `DiagramDocument`) — e.g., `defaultConnectorStyle: Partial<ConnectorStyle>` alongside `selection` in the reducer's `State`
+- [ ] When `ADD_CONNECTOR` is dispatched from `ConnectorDrawing`, merge the active default style into the payload
+- [ ] Controls: stroke-dash toggle (solid / dashed / dotted), arrowhead-end select (none / open / filled)
+- [ ] Add tests: default style is applied to newly created connectors; changing the default does not affect existing connectors
 
 ---
 
@@ -414,3 +433,4 @@ A major feature: allow users to upload an existing `.vsdx` file and have it rend
 | T22 | Image embedding | T07, T11 | T17–T21, T23–T24 |
 | T23 | Export filename | T14 | T17–T22, T24 |
 | T24 | Visio import | T04, T05, T12 | T17–T23 |
+| T25 | Connector style picker + arrowhead fix | T08 | T19, T22, T24 |

@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
-import { ShapePalette } from "./ShapePalette.js";
+import { ShapePalette, LIBRARIES } from "./ShapePalette.js";
 import type { ShapeType } from "@diagrammer/shared";
 import { createRef } from "react";
 
@@ -30,18 +30,55 @@ function renderPalette(onAddShape = vi.fn(), transform = defaultTransform) {
   return { svgRef, onAddShape };
 }
 
-describe("ShapePalette", () => {
-  beforeEach(() => {
-    // Prevent jsdom errors from window event listeners
-    vi.spyOn(window, "addEventListener");
-    vi.spyOn(window, "removeEventListener");
+describe("ShapePalette — libraries", () => {
+  it("renders a collapsible header for each library", () => {
+    renderPalette();
+    for (const lib of LIBRARIES) {
+      expect(screen.getByLabelText(lib.name)).toBeTruthy();
+    }
   });
 
-  afterEach(() => {
-    vi.restoreAllMocks();
+  it("renders 'Basic Shapes' and 'Flowchart' library headers", () => {
+    renderPalette();
+    expect(screen.getByText("Basic Shapes")).toBeTruthy();
+    expect(screen.getByText("Flowchart")).toBeTruthy();
   });
 
-  it("renders a tile for each shape type", () => {
+  it("all libraries are expanded by default", () => {
+    renderPalette();
+    for (const lib of LIBRARIES) {
+      const btn = screen.getByLabelText(lib.name);
+      expect(btn.getAttribute("aria-expanded")).toBe("true");
+    }
+  });
+
+  it("collapses a library when its header is clicked", () => {
+    renderPalette();
+    const btn = screen.getByLabelText("Basic Shapes");
+    fireEvent.click(btn);
+    expect(btn.getAttribute("aria-expanded")).toBe("false");
+    // Basic Shapes tiles should be hidden
+    expect(screen.queryByTitle("Rectangle")).toBeNull();
+  });
+
+  it("re-expands a library when its header is clicked again", () => {
+    renderPalette();
+    const btn = screen.getByLabelText("Basic Shapes");
+    fireEvent.click(btn);
+    fireEvent.click(btn);
+    expect(btn.getAttribute("aria-expanded")).toBe("true");
+    expect(screen.getByTitle("Rectangle")).toBeTruthy();
+  });
+
+  it("collapsing one library does not affect other libraries", () => {
+    renderPalette();
+    fireEvent.click(screen.getByLabelText("Basic Shapes"));
+    // Flowchart tiles should still be visible
+    expect(screen.getByTitle("Process")).toBeTruthy();
+    expect(screen.getByTitle("Decision")).toBeTruthy();
+  });
+
+  it("renders all Basic Shapes tiles when expanded", () => {
     renderPalette();
     const labels = ["Rectangle", "Ellipse", "Diamond", "Rounded", "Triangle", "Parallel"];
     for (const label of labels) {
@@ -49,22 +86,23 @@ describe("ShapePalette", () => {
     }
   });
 
-  it("renders the Shapes heading", () => {
+  it("renders all Flowchart tiles when expanded", () => {
     renderPalette();
-    expect(screen.getByText("Shapes")).toBeTruthy();
+    const labels = ["Process", "Decision", "Terminator", "Data", "Start/End"];
+    for (const label of labels) {
+      expect(screen.getByTitle(label)).toBeTruthy();
+    }
+  });
+});
+
+describe("ShapePalette — drag and drop", () => {
+  beforeEach(() => {
+    vi.spyOn(window, "addEventListener");
+    vi.spyOn(window, "removeEventListener");
   });
 
-  it("renders 6 tiles total", () => {
-    const { container } = render(
-      <ShapePalette
-        svgRef={makeSvgRef()}
-        transform={defaultTransform}
-        onAddShape={vi.fn()}
-      />
-    );
-    // Each tile has a title attribute
-    const tiles = container.querySelectorAll("[title]");
-    expect(tiles.length).toBe(6);
+  afterEach(() => {
+    vi.restoreAllMocks();
   });
 
   it("registers window listeners on mousedown and cleans them up on mouseup", () => {
@@ -75,7 +113,6 @@ describe("ShapePalette", () => {
     expect(window.addEventListener).toHaveBeenCalledWith("mousemove", expect.any(Function));
     expect(window.addEventListener).toHaveBeenCalledWith("mouseup", expect.any(Function));
 
-    // Simulate mouseup to trigger cleanup
     fireEvent.mouseUp(window);
     expect(window.removeEventListener).toHaveBeenCalledWith("mousemove", expect.any(Function));
     expect(window.removeEventListener).toHaveBeenCalledWith("mouseup", expect.any(Function));
@@ -83,15 +120,9 @@ describe("ShapePalette", () => {
 
   it("shows the ghost element during drag", () => {
     const { container } = render(
-      <ShapePalette
-        svgRef={makeSvgRef()}
-        transform={defaultTransform}
-        onAddShape={vi.fn()}
-      />
+      <ShapePalette svgRef={makeSvgRef()} transform={defaultTransform} onAddShape={vi.fn()} />
     );
-    // Ghost should not be visible before drag
     expect(container.querySelectorAll("[style*='position: fixed']").length).toBe(0);
-
     fireEvent.mouseDown(screen.getByTitle("Ellipse"), { clientX: 50, clientY: 50 });
     expect(container.querySelectorAll("[style*='position: fixed']").length).toBe(1);
   });
@@ -102,8 +133,6 @@ describe("ShapePalette", () => {
     render(<ShapePalette svgRef={svgRef} transform={defaultTransform} onAddShape={onAddShape} />);
 
     fireEvent.mouseDown(screen.getByTitle("Diamond"), { clientX: 50, clientY: 50 });
-
-    // Drop inside the SVG bounds (left: 200, top: 100, right: 1000, bottom: 700)
     fireEvent.mouseUp(window, { clientX: 500, clientY: 400 });
 
     expect(onAddShape).toHaveBeenCalledOnce();
@@ -117,8 +146,6 @@ describe("ShapePalette", () => {
     render(<ShapePalette svgRef={svgRef} transform={defaultTransform} onAddShape={onAddShape} />);
 
     fireEvent.mouseDown(screen.getByTitle("Rectangle"), { clientX: 50, clientY: 50 });
-
-    // Drop to the left of the canvas (clientX < 200)
     fireEvent.mouseUp(window, { clientX: 50, clientY: 400 });
 
     expect(onAddShape).not.toHaveBeenCalled();
@@ -126,17 +153,14 @@ describe("ShapePalette", () => {
 
   it("places the shape centered on the drop point", () => {
     const onAddShape = vi.fn();
-    // Canvas at (200, 100), scale=1, no pan offset
     const svgRef = makeSvgRef({ left: 200, top: 100, right: 1000, bottom: 700 });
     render(<ShapePalette svgRef={svgRef} transform={defaultTransform} onAddShape={onAddShape} />);
 
     fireEvent.mouseDown(screen.getByTitle("Rectangle"), { clientX: 50, clientY: 50 });
-    // Drop at clientX=296, clientY=196 → svgX=96px, svgY=96px → 1 inch → center offset 0.5"
     fireEvent.mouseUp(window, { clientX: 296, clientY: 196 });
 
     expect(onAddShape).toHaveBeenCalledOnce();
     const [, x, y] = onAddShape.mock.calls[0] as [ShapeType, number, number];
-    // Expected: toInches(96) - 0.5 = 1 - 0.5 = 0.5
     expect(x).toBeCloseTo(0.5);
     expect(y).toBeCloseTo(0.5);
   });
@@ -147,8 +171,6 @@ describe("ShapePalette", () => {
     render(<ShapePalette svgRef={svgRef} transform={defaultTransform} onAddShape={onAddShape} />);
 
     fireEvent.mouseDown(screen.getByTitle("Rectangle"), { clientX: 50, clientY: 50 });
-    // Drop just inside the top-left corner: svgX = 204-200 = 4px, svgY = 104-100 = 4px
-    // toInches(4) ≈ 0.042" → x = 0.042 - 0.5 ≈ -0.458 (negative, no clamping applied)
     fireEvent.mouseUp(window, { clientX: 204, clientY: 104 });
 
     expect(onAddShape).toHaveBeenCalledOnce();
@@ -160,19 +182,28 @@ describe("ShapePalette", () => {
   it("accounts for canvas transform (zoom + pan) when computing drop position", () => {
     const onAddShape = vi.fn();
     const svgRef = makeSvgRef({ left: 200, top: 100, right: 1000, bottom: 700 });
-    // Scale=2, pan offset x=48px, y=0
     const transform = { scale: 2, x: 48, y: 0 };
     render(<ShapePalette svgRef={svgRef} transform={transform} onAddShape={onAddShape} />);
 
     fireEvent.mouseDown(screen.getByTitle("Ellipse"), { clientX: 50, clientY: 50 });
-    // clientX=296, clientY=196
-    // svgX = (296 - 200 - 48) / 2 = 48/2 = 24px → toInches(24) = 0.25" → x = 0.25 - 0.5 = -0.25
-    // svgY = (196 - 100 - 0) / 2 = 96/2 = 48px → toInches(48) = 0.5" → y = 0.5 - 0.5 = 0
     fireEvent.mouseUp(window, { clientX: 296, clientY: 196 });
 
     expect(onAddShape).toHaveBeenCalledOnce();
     const [, x, y] = onAddShape.mock.calls[0] as [ShapeType, number, number];
     expect(x).toBeCloseTo(-0.25);
     expect(y).toBeCloseTo(0);
+  });
+
+  it("calls onAddShape with the Flowchart Process type (rectangle) on drop", () => {
+    const onAddShape = vi.fn();
+    const svgRef = makeSvgRef({ left: 200, top: 100, right: 1000, bottom: 700 });
+    render(<ShapePalette svgRef={svgRef} transform={defaultTransform} onAddShape={onAddShape} />);
+
+    fireEvent.mouseDown(screen.getByTitle("Process"), { clientX: 50, clientY: 50 });
+    fireEvent.mouseUp(window, { clientX: 500, clientY: 400 });
+
+    expect(onAddShape).toHaveBeenCalledOnce();
+    const [type] = onAddShape.mock.calls[0] as [ShapeType, number, number];
+    expect(type).toBe("rectangle");
   });
 });
