@@ -19,6 +19,8 @@ export type DiagramAction =
   | { type: "DELETE_CONNECTOR"; payload: { id: string } }
   | { type: "ADD_PAGE"; payload: Omit<DiagramPage, "id" | "shapes" | "connectors"> }
   | { type: "SET_ACTIVE_PAGE"; payload: { pageId: string } }
+  | { type: "RENAME_PAGE"; payload: { pageId: string; name: string } }
+  | { type: "DELETE_PAGE"; payload: { pageId: string } }
   | { type: "SELECT"; payload: { id: string | null } }
   | { type: "UPDATE_CONNECTOR_STYLE"; payload: { id: string; style: Partial<ConnectorStyle> } }
   | { type: "RESET" }

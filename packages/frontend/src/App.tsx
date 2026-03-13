@@ -10,6 +10,7 @@ import { PropertiesPanel } from "./properties/PropertiesPanel.js";
 import { DEFAULT_CONNECTOR_STYLE, DEFAULT_SHAPE_STYLE } from "@diagrammer/shared";
 import type { ShapeType } from "@diagrammer/shared";
 import { ShapePalette } from "./toolbar/ShapePalette.js";
+import { PageTabBar } from "./canvas/PageTabBar.js";
 import { ExportButton } from "./toolbar/ExportButton.js";
 import { OfflineBanner } from "./toolbar/OfflineBanner.js";
 import { useHealthCheck } from "./toolbar/useHealthCheck.js";
@@ -114,43 +115,58 @@ function DiagramEditor() {
         </div>
 
         <div style={styles.canvas}>
-          <Canvas
-            page={activePage}
-            svgRef={svgRef}
-            onTransformChange={setTransform}
-            onDeselect={() => dispatch({ type: "SELECT", payload: { id: null } })}
-          >
-            <ConnectorLayer
-              connectors={activePage.connectors}
-              shapes={activePage.shapes}
-              selectedId={state.selection}
-              onSelect={(id) => dispatch({ type: "SELECT", payload: { id } })}
-            />
-            <ShapeLayer
-              shapes={activePage.shapes}
-              selectedId={state.selection}
-              onSelect={(id) => dispatch({ type: "SELECT", payload: { id } })}
-              onMove={(id, dx, dy) => dispatch({ type: "MOVE_SHAPE", payload: { id, dx, dy } })}
-              onLabelChange={(id, label) => dispatch({ type: "SET_LABEL", payload: { id, label } })}
-              onStartConnect={handleStartConnect}
-            />
-            <ConnectorDrawing
-              shapes={activePage.shapes}
+          <div style={styles.canvasArea}>
+            <Canvas
+              page={activePage}
               svgRef={svgRef}
-              transform={transform}
-              onConnect={handleConnect}
-              inProgress={inProgress}
-              setInProgress={setInProgress}
-            />
-            {selectedShape && (
-              <SelectionOverlay
-                shape={selectedShape}
-                onResize={(id, width, height) =>
-                  dispatch({ type: "RESIZE_SHAPE", payload: { id, width, height } })
-                }
+              onTransformChange={setTransform}
+              onDeselect={() => dispatch({ type: "SELECT", payload: { id: null } })}
+            >
+              <ConnectorLayer
+                connectors={activePage.connectors}
+                shapes={activePage.shapes}
+                selectedId={state.selection}
+                onSelect={(id) => dispatch({ type: "SELECT", payload: { id } })}
               />
-            )}
-          </Canvas>
+              <ShapeLayer
+                shapes={activePage.shapes}
+                selectedId={state.selection}
+                onSelect={(id) => dispatch({ type: "SELECT", payload: { id } })}
+                onMove={(id, dx, dy) => dispatch({ type: "MOVE_SHAPE", payload: { id, dx, dy } })}
+                onLabelChange={(id, label) => dispatch({ type: "SET_LABEL", payload: { id, label } })}
+                onStartConnect={handleStartConnect}
+              />
+              <ConnectorDrawing
+                shapes={activePage.shapes}
+                svgRef={svgRef}
+                transform={transform}
+                onConnect={handleConnect}
+                inProgress={inProgress}
+                setInProgress={setInProgress}
+              />
+              {selectedShape && (
+                <SelectionOverlay
+                  shape={selectedShape}
+                  onResize={(id, width, height) =>
+                    dispatch({ type: "RESIZE_SHAPE", payload: { id, width, height } })
+                  }
+                />
+              )}
+            </Canvas>
+          </div>
+          <PageTabBar
+            pages={state.document.pages}
+            activePageId={state.activePageId}
+            onSelect={(pageId) => dispatch({ type: "SET_ACTIVE_PAGE", payload: { pageId } })}
+            onAdd={() =>
+              dispatch({
+                type: "ADD_PAGE",
+                payload: { name: `Page ${state.document.pages.length + 1}`, width: 11, height: 8.5 },
+              })
+            }
+            onRename={(pageId, name) => dispatch({ type: "RENAME_PAGE", payload: { pageId, name } })}
+            onDelete={(pageId) => dispatch({ type: "DELETE_PAGE", payload: { pageId } })}
+          />
         </div>
 
         <div style={styles.properties}>
@@ -220,6 +236,13 @@ const styles: Record<string, React.CSSProperties> = {
     cursor: "pointer",
   },
   canvas: {
+    overflow: "hidden",
+    position: "relative",
+    display: "flex",
+    flexDirection: "column",
+  },
+  canvasArea: {
+    flex: 1,
     overflow: "hidden",
     position: "relative",
   },
