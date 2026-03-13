@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import { ExportButton } from "./ExportButton.js";
+import { ExportButton, sanitizeFilename } from "./ExportButton.js";
 import { createEmptyDocument } from "@diagrammer/shared";
 
 const doc = createEmptyDocument("My Diagram", "Tester");
@@ -31,10 +31,65 @@ function mockFetchError(status = 422, message = "Invalid document") {
   });
 }
 
+// Helper: intercept the <a> click created during export and capture its download attr
+function spyOnAnchorClick() {
+  const origCreate = window.document.createElement.bind(window.document);
+  let capturedDownload = "";
+  const clickSpy = vi.fn();
+  vi.spyOn(window.document, "createElement").mockImplementation((tag: string) => {
+    if (tag === "a") {
+      const a = origCreate("a") as HTMLAnchorElement;
+      vi.spyOn(a, "click").mockImplementation(() => {
+        capturedDownload = a.download;
+        clickSpy();
+      });
+      return a;
+    }
+    return origCreate(tag);
+  });
+  return { clickSpy, getDownload: () => capturedDownload };
+}
+
+describe("sanitizeFilename", () => {
+  it("passes through a clean name", () => {
+    expect(sanitizeFilename("my-diagram")).toBe("my-diagram");
+  });
+
+  it("strips characters invalid in filenames", () => {
+    expect(sanitizeFilename('report/2024:final*v2?"<test>|')).toBe("report2024finalv2test");
+  });
+
+  it("trims surrounding whitespace", () => {
+    expect(sanitizeFilename("  hello  ")).toBe("hello");
+  });
+
+  it("strips trailing dots", () => {
+    expect(sanitizeFilename("diagram...")).toBe("diagram");
+  });
+
+  it("falls back to 'diagram' for an empty result", () => {
+    expect(sanitizeFilename("   ")).toBe("diagram");
+    expect(sanitizeFilename("///")).toBe("diagram");
+  });
+});
+
 describe("ExportButton", () => {
   it("renders the export button", () => {
     render(<ExportButton doc={doc} />);
     expect(screen.getByRole("button", { name: /export to visio/i })).toBeTruthy();
+  });
+
+  it("renders the filename input pre-populated with the document title", () => {
+    render(<ExportButton doc={doc} />);
+    const input = screen.getByRole("textbox") as HTMLInputElement;
+    expect(input.value).toBe("My Diagram");
+  });
+
+  it("sanitizes the document title for the initial filename value", () => {
+    const dirtyDoc = { ...doc, meta: { ...doc.meta, title: "my:diagram/file" } };
+    render(<ExportButton doc={dirtyDoc} />);
+    const input = screen.getByRole("textbox") as HTMLInputElement;
+    expect(input.value).toBe("mydiagramfile");
   });
 
   it("is disabled when the disabled prop is true", () => {
@@ -56,18 +111,40 @@ describe("ExportButton", () => {
     resolve({ ok: true, blob: async () => new Blob() });
   });
 
+  it("uses the filename input value as the download attribute", async () => {
+    const { clickSpy, getDownload } = spyOnAnchorClick();
+
+    mockFetchOk();
+    render(<ExportButton doc={doc} />);
+
+    // Change the filename
+    const input = screen.getByRole("textbox");
+    fireEvent.change(input, { target: { value: "my-export" } });
+
+    fireEvent.click(screen.getByRole("button"));
+
+    await waitFor(() => expect(clickSpy).toHaveBeenCalled());
+    expect(getDownload()).toBe("my-export.vsdx");
+  });
+
+  it("sanitizes the filename before using it as the download attribute", async () => {
+    const { clickSpy, getDownload } = spyOnAnchorClick();
+
+    mockFetchOk();
+    render(<ExportButton doc={doc} />);
+
+    // Type an invalid filename
+    const input = screen.getByRole("textbox");
+    fireEvent.change(input, { target: { value: "report/2024:final" } });
+
+    fireEvent.click(screen.getByRole("button"));
+
+    await waitFor(() => expect(clickSpy).toHaveBeenCalled());
+    expect(getDownload()).toBe("report2024final.vsdx");
+  });
+
   it("calls createObjectURL and revokeObjectURL on success", async () => {
-    // Intercept anchor.click() to prevent happy-dom navigation
-    const origCreate = window.document.createElement.bind(window.document);
-    const clickSpy = vi.fn();
-    vi.spyOn(window.document, "createElement").mockImplementation((tag: string) => {
-      if (tag === "a") {
-        const a = origCreate("a") as HTMLAnchorElement;
-        vi.spyOn(a, "click").mockImplementation(clickSpy);
-        return a;
-      }
-      return origCreate(tag);
-    });
+    const { clickSpy } = spyOnAnchorClick();
 
     mockFetchOk();
     render(<ExportButton doc={doc} />);
