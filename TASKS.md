@@ -327,10 +327,10 @@ These are independent of each other and can be picked up in any order after Phas
 ### T21 · Named Styles + Stroke/Shadow
 **Depends on:** T10
 
-- [ ] Add `strokeDash: solid | dashed | dotted` to `ShapeStyle`; render as SVG `stroke-dasharray`
-- [ ] Add `shadow: boolean` to `ShapeStyle`; render as SVG `<filter>` drop-shadow
-- [ ] Expose `styleSheet.namedStyles` in Properties Panel as a "Style Presets" dropdown
-- [ ] Map new style fields in `DiagramMapper`
+- [x] Add `strokeDash: solid | dashed | dotted` to `ShapeStyle`; render as SVG `stroke-dasharray`
+- [x] Add `shadow: boolean` to `ShapeStyle`; render as SVG `<filter>` drop-shadow
+- [x] Expose `styleSheet.namedStyles` in Properties Panel as a "Style Presets" dropdown
+- [x] Map new style fields in `DiagramMapper`
 
 ---
 

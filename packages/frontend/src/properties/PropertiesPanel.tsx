@@ -2,6 +2,7 @@ import { useDiagram } from "../state/index.js";
 import { StyleEditor } from "./StyleEditor.js";
 import { ConnectorStyleEditor } from "./ConnectorStyleEditor.js";
 import { CustomProperties } from "./CustomProperties.js";
+import { StylePresets } from "./StylePresets.js";
 import { THEME } from "../theme.js";
 
 export function PropertiesPanel() {
@@ -20,6 +21,12 @@ export function PropertiesPanel() {
     const propCount = Object.keys(shape.properties).length;
     return (
       <div style={panelStyle}>
+        <Section title="Style Presets">
+          <StylePresets
+            styleSheet={state.document.styleSheet}
+            onApply={(patch) => dispatch({ type: "UPDATE_STYLE", payload: { id: shape.id, style: patch } })}
+          />
+        </Section>
         <Section title="Style">
           <StyleEditor
             style={shape.style}

@@ -141,6 +141,11 @@ export function Canvas({ page, children, onDeselect, svgRef: externalRef, onTran
       onMouseLeave={onMouseUp}
       onClick={(e) => { if (e.target === e.currentTarget) onDeselect?.(); }}
     >
+      <defs>
+        <filter id="shape-shadow" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="2" dy="2" stdDeviation="3" floodOpacity="0.3" />
+        </filter>
+      </defs>
       <g transform={transformStr}>
         {/* Page background */}
         <rect width={pageW} height={pageH} fill="#f8f8f2" />
