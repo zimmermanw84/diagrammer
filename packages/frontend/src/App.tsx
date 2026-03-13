@@ -10,6 +10,9 @@ import { PropertiesPanel } from "./properties/PropertiesPanel.js";
 import { DEFAULT_CONNECTOR_STYLE, DEFAULT_SHAPE_STYLE } from "@diagrammer/shared";
 import type { ShapeType } from "@diagrammer/shared";
 import { ShapePalette } from "./toolbar/ShapePalette.js";
+import { ExportButton } from "./toolbar/ExportButton.js";
+import { OfflineBanner } from "./toolbar/OfflineBanner.js";
+import { useHealthCheck } from "./toolbar/useHealthCheck.js";
 import type { InProgress } from "./canvas/ConnectorDrawing.js";
 import type { ConnectionPoint } from "./canvas/shapes/ConnectionHandles.js";
 
@@ -20,6 +23,7 @@ function DiagramEditor() {
   const [transform, setTransform] = useState({ scale: 1, x: 0, y: 0 });
   const [inProgress, setInProgress] = useState<InProgress | null>(null);
   const selectedShape = activePage.shapes.find((s) => s.id === state.selection) ?? null;
+  const { isOnline } = useHealthCheck();
 
   useKeyboardShortcuts({
     selection: state.selection,
@@ -49,73 +53,89 @@ function DiagramEditor() {
   };
 
   return (
-    <div style={styles.shell}>
-      <div style={styles.toolbar}>
-        <ShapePalette
-          svgRef={svgRef}
-          transform={transform}
-          onAddShape={(type: ShapeType, x: number, y: number) =>
-            dispatch({
-              type: "ADD_SHAPE",
-              payload: {
-                type,
-                x,
-                y,
-                width: 1,
-                height: 1,
-                label: "",
-                style: { ...DEFAULT_SHAPE_STYLE },
-                properties: {},
-              },
-            })
-          }
-        />
-      </div>
-
-      <div style={styles.canvas}>
-        <Canvas
-          page={activePage}
-          svgRef={svgRef}
-          onTransformChange={setTransform}
-          onDeselect={() => dispatch({ type: "SELECT", payload: { id: null } })}
-        >
-          <ConnectorLayer
-            connectors={activePage.connectors}
-            shapes={activePage.shapes}
-            selectedId={state.selection}
-            onSelect={(id) => dispatch({ type: "SELECT", payload: { id } })}
-          />
-          <ShapeLayer
-            shapes={activePage.shapes}
-            selectedId={state.selection}
-            onSelect={(id) => dispatch({ type: "SELECT", payload: { id } })}
-            onMove={(id, dx, dy) => dispatch({ type: "MOVE_SHAPE", payload: { id, dx, dy } })}
-            onLabelChange={(id, label) => dispatch({ type: "SET_LABEL", payload: { id, label } })}
-            onStartConnect={handleStartConnect}
-          />
-          <ConnectorDrawing
-            shapes={activePage.shapes}
+    <>
+      {!isOnline && <OfflineBanner />}
+      <div style={styles.shell}>
+        <div style={styles.toolbar}>
+          <ShapePalette
             svgRef={svgRef}
             transform={transform}
-            onConnect={handleConnect}
-            inProgress={inProgress}
-            setInProgress={setInProgress}
+            onAddShape={(type: ShapeType, x: number, y: number) =>
+              dispatch({
+                type: "ADD_SHAPE",
+                payload: {
+                  type,
+                  x,
+                  y,
+                  width: 1,
+                  height: 1,
+                  label: "",
+                  style: { ...DEFAULT_SHAPE_STYLE },
+                  properties: {},
+                },
+              })
+            }
           />
-          {selectedShape && (
-            <SelectionOverlay
-              shape={selectedShape}
-              onResize={(id, width, height) =>
-                dispatch({ type: "RESIZE_SHAPE", payload: { id, width, height } })
-              }
-            />
-          )}
-        </Canvas>
-      </div>
+          <div style={styles.toolbarActions}>
+            <ExportButton doc={state.document} disabled={!isOnline} />
+            <button
+              style={styles.newButton}
+              onClick={() => {
+                if (window.confirm("Start a new diagram? Unsaved changes will be lost.")) {
+                  dispatch({ type: "RESET" });
+                }
+              }}
+            >
+              New Diagram
+            </button>
+          </div>
+        </div>
 
-      <div style={styles.properties}>
-        <PropertiesPanel />
+        <div style={styles.canvas}>
+          <Canvas
+            page={activePage}
+            svgRef={svgRef}
+            onTransformChange={setTransform}
+            onDeselect={() => dispatch({ type: "SELECT", payload: { id: null } })}
+          >
+            <ConnectorLayer
+              connectors={activePage.connectors}
+              shapes={activePage.shapes}
+              selectedId={state.selection}
+              onSelect={(id) => dispatch({ type: "SELECT", payload: { id } })}
+            />
+            <ShapeLayer
+              shapes={activePage.shapes}
+              selectedId={state.selection}
+              onSelect={(id) => dispatch({ type: "SELECT", payload: { id } })}
+              onMove={(id, dx, dy) => dispatch({ type: "MOVE_SHAPE", payload: { id, dx, dy } })}
+              onLabelChange={(id, label) => dispatch({ type: "SET_LABEL", payload: { id, label } })}
+              onStartConnect={handleStartConnect}
+            />
+            <ConnectorDrawing
+              shapes={activePage.shapes}
+              svgRef={svgRef}
+              transform={transform}
+              onConnect={handleConnect}
+              inProgress={inProgress}
+              setInProgress={setInProgress}
+            />
+            {selectedShape && (
+              <SelectionOverlay
+                shape={selectedShape}
+                onResize={(id, width, height) =>
+                  dispatch({ type: "RESIZE_SHAPE", payload: { id, width, height } })
+                }
+              />
+            )}
+          </Canvas>
+        </div>
+
+        <div style={styles.properties}>
+          <PropertiesPanel />
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 
@@ -140,6 +160,24 @@ const styles: Record<string, React.CSSProperties> = {
     color: "#cdd6f4",
     padding: "16px",
     borderRight: "1px solid #313244",
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "space-between",
+  },
+  toolbarActions: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "6px",
+  },
+  newButton: {
+    width: "100%",
+    padding: "8px 12px",
+    borderRadius: "6px",
+    border: "1px solid #45475a",
+    background: "transparent",
+    color: "#6c6f85",
+    fontSize: "12px",
+    cursor: "pointer",
   },
   canvas: {
     overflow: "hidden",

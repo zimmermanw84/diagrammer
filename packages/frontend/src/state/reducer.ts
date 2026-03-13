@@ -1,6 +1,7 @@
 import type { DiagramDocument, DiagramPage } from "@diagrammer/shared";
 import { createEmptyDocument } from "@diagrammer/shared";
 import type { DiagramAction } from "./actions.js";
+import { loadSavedDocument } from "./persistence.js";
 
 export interface State {
   document: DiagramDocument;
@@ -8,13 +9,17 @@ export interface State {
   selection: string | null;
 }
 
-export function createInitialState(): State {
+export function createFreshState(): State {
   const document = createEmptyDocument();
-  return {
-    document,
-    activePageId: document.pages[0].id,
-    selection: null,
-  };
+  return { document, activePageId: document.pages[0]!.id, selection: null };
+}
+
+export function createInitialState(): State {
+  const saved = loadSavedDocument();
+  if (saved) {
+    return { document: saved, activePageId: saved.pages[0]!.id, selection: null };
+  }
+  return createFreshState();
 }
 
 function updatePage(
@@ -237,6 +242,9 @@ export function diagramReducer(state: State, action: DiagramAction): State {
         },
       };
     }
+
+    case "RESET":
+      return createFreshState();
 
     default:
       return state;

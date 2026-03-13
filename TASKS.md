@@ -39,11 +39,11 @@ These must be completed before anything else. They are sequential.
 **Depends on:** nothing
 **Parallelizable with:** nothing (foundational)
 
-- [ ] Init root `package.json` with `"workspaces": ["packages/*"]`
-- [ ] Add `tsconfig.base.json` with strict settings, path aliases
-- [ ] Add root `eslint.config.js` with `typescript-eslint` and React rules
-- [ ] Add root `.gitignore`, `.nvmrc`
-- [ ] Create the `packages/shared`, `packages/frontend`, `packages/backend` directories
+- [x] Init root `package.json` with `"workspaces": ["packages/*"]`
+- [x] Add `tsconfig.base.json` with strict settings, path aliases
+- [x] Add root `eslint.config.js` with `typescript-eslint` and React rules
+- [x] Add root `.gitignore`, `.nvmrc`
+- [x] Create the `packages/shared`, `packages/frontend`, `packages/backend` directories
 
 ---
 
@@ -51,17 +51,17 @@ These must be completed before anything else. They are sequential.
 **Depends on:** T01
 **Parallelizable with:** nothing (T03 and T04 both depend on this)
 
-- [ ] Init `packages/shared/package.json` (name: `@diagrammer/shared`)
-- [ ] Install `zod` in shared package
-- [ ] Define all Zod schemas and inferred TypeScript types:
+- [x] Init `packages/shared/package.json` (name: `@diagrammer/shared`)
+- [x] Install `zod` in shared package
+- [x] Define all Zod schemas and inferred TypeScript types:
   - `DocumentMeta`, `DiagramDocument`
   - `DiagramPage`
   - `ShapeType` enum, `ShapeStyle`, `DiagramShape`
   - `ArrowHeadType` enum, `ConnectorStyle`, `RoutingAlgorithm`, `DiagramConnector`
   - `StyleSheet`
-- [ ] Export `DiagramDocumentSchema` (root validator)
-- [ ] Export `createEmptyDocument()` factory (single page, no shapes)
-- [ ] Confirm package builds and types are importable
+- [x] Export `DiagramDocumentSchema` (root validator)
+- [x] Export `createEmptyDocument()` factory (single page, no shapes)
+- [x] Confirm package builds and types are importable
 
 ---
 
@@ -75,12 +75,12 @@ Once T02 is done, these two tracks are fully independent.
 **Depends on:** T02
 **Parallelizable with:** T04 (Backend Scaffold)
 
-- [ ] Init `packages/frontend` with `vite` + `@vitejs/plugin-react`
-- [ ] Install `react`, `react-dom`, `typescript`
-- [ ] Add `@diagrammer/shared` as a workspace dependency
-- [ ] Set up `tsconfig.json` extending base
-- [ ] Create bare-bones `App.tsx` with a placeholder layout (toolbar left, canvas center, properties right)
-- [ ] Verify `npm run dev` works at `localhost:5173`
+- [x] Init `packages/frontend` with `vite` + `@vitejs/plugin-react`
+- [x] Install `react`, `react-dom`, `typescript`
+- [x] Add `@diagrammer/shared` as a workspace dependency
+- [x] Set up `tsconfig.json` extending base
+- [x] Create bare-bones `App.tsx` with a placeholder layout (toolbar left, canvas center, properties right)
+- [x] Verify `npm run dev` works at `localhost:5173`
 
 ---
 
@@ -88,13 +88,13 @@ Once T02 is done, these two tracks are fully independent.
 **Depends on:** T02
 **Parallelizable with:** T03 (Frontend Scaffold)
 
-- [ ] Init `packages/backend/package.json`
-- [ ] Install `express`, `cors`, `zod`, `ts-visio` (pin to exact version)
-- [ ] Install `typescript`, `tsx` (or `ts-node`) for dev execution
-- [ ] Add `@diagrammer/shared` as a workspace dependency
-- [ ] Create `src/index.ts` — Express app with JSON body parser, CORS (`localhost:5173`)
-- [ ] Mount a stub router at `/api/v1`
-- [ ] Verify server starts at `localhost:3001`
+- [x] Init `packages/backend/package.json`
+- [x] Install `express`, `cors`, `zod`, `ts-visio` (pin to exact version)
+- [x] Install `typescript`, `tsx` (or `ts-node`) for dev execution
+- [x] Add `@diagrammer/shared` as a workspace dependency
+- [x] Create `src/index.ts` — Express app with JSON body parser, CORS (`localhost:5173`)
+- [x] Mount a stub router at `/api/v1`
+- [x] Verify server starts at `localhost:3001`
 
 ---
 
@@ -108,15 +108,15 @@ All of these depend on T03. T05 and T06 can start simultaneously; the rest depen
 **Depends on:** T03
 **Parallelizable with:** T06
 
-- [ ] Create `src/state/reducer.ts` with `DiagramDocument` as state shape
-- [ ] Implement all Phase 1 actions:
+- [x] Create `src/state/reducer.ts` with `DiagramDocument` as state shape
+- [x] Implement all Phase 1 actions:
   `ADD_SHAPE`, `MOVE_SHAPE`, `RESIZE_SHAPE`, `DELETE_SHAPE`, `SET_LABEL`,
   `UPDATE_STYLE`, `SET_PROPERTY`, `DELETE_PROPERTY`,
   `ADD_CONNECTOR`, `DELETE_CONNECTOR`,
   `ADD_PAGE`, `SET_ACTIVE_PAGE`
-- [ ] Create `DiagramProvider` context that wraps `useReducer` and exposes `state` + `dispatch`
-- [ ] Wrap `App.tsx` in `DiagramProvider`
-- [ ] Add `selection: string | null` to UI state (separate from `DiagramDocument`)
+- [x] Create `DiagramProvider` context that wraps `useReducer` and exposes `state` + `dispatch`
+- [x] Wrap `App.tsx` in `DiagramProvider`
+- [x] Add `selection: string | null` to UI state (separate from `DiagramDocument`)
 
 ---
 
@@ -124,12 +124,12 @@ All of these depend on T03. T05 and T06 can start simultaneously; the rest depen
 **Depends on:** T03
 **Parallelizable with:** T05
 
-- [ ] Create `Canvas` component with a full-viewport `<svg>` element
-- [ ] Implement PPI/zoom constant (96px per inch at 100%)
-- [ ] Add `CanvasBackground` — dotted or line grid rendered as SVG `<defs>` + `<use>` pattern
-- [ ] Add zoom state (wheel event → scale transform on a `<g>` wrapper)
-- [ ] Add pan state (middle-click/space+drag → translate transform)
-- [ ] Expose a `toInches(px)` / `toPixels(inches)` utility
+- [x] Create `Canvas` component with a full-viewport `<svg>` element
+- [x] Implement PPI/zoom constant (96px per inch at 100%)
+- [x] Add `CanvasBackground` — dotted or line grid rendered as SVG `<defs>` + `<use>` pattern
+- [x] Add zoom state (wheel event → scale transform on a `<g>` wrapper)
+- [x] Add pan state (middle-click/space+drag → translate transform)
+- [x] Expose a `toInches(px)` / `toPixels(inches)` utility
 
 ---
 
@@ -137,19 +137,19 @@ All of these depend on T03. T05 and T06 can start simultaneously; the rest depen
 **Depends on:** T05, T06
 **Parallelizable with:** T10
 
-- [ ] Create `ShapeLayer` that maps `page.shapes` → `ShapeElement` components
-- [ ] Implement `ShapeElement` for each `ShapeType`:
+- [x] Create `ShapeLayer` that maps `page.shapes` → `ShapeElement` components
+- [x] Implement `ShapeElement` for each `ShapeType`:
   - `rectangle` → `<rect>`
   - `ellipse` → `<ellipse>`
   - `diamond` → `<polygon>` (4 points)
   - `rounded_rectangle` → `<rect rx>`
   - `triangle` → `<polygon>` (3 points)
   - `parallelogram` → `<polygon>` (4 points with offset)
-- [ ] Apply `ShapeStyle` (fill, stroke, stroke-width) to each element
-- [ ] Render shape label as centered `<text>` (or `<foreignObject>` for wrapping)
-- [ ] Click on shape → dispatch selection, stop propagation
-- [ ] Drag on selected shape → dispatch `MOVE_SHAPE`
-- [ ] Double-click → enter inline label edit mode (`<foreignObject>` + `<input>`, blur commits)
+- [x] Apply `ShapeStyle` (fill, stroke, stroke-width) to each element
+- [x] Render shape label as centered `<text>` (or `<foreignObject>` for wrapping)
+- [x] Click on shape → dispatch selection, stop propagation
+- [x] Drag on selected shape → dispatch `MOVE_SHAPE`
+- [x] Double-click → enter inline label edit mode (`<foreignObject>` + `<input>`, blur commits)
 
 ---
 
@@ -157,16 +157,16 @@ All of these depend on T03. T05 and T06 can start simultaneously; the rest depen
 **Depends on:** T07
 **Parallelizable with:** T09, T10
 
-- [ ] Create `ConnectorLayer` that maps `page.connectors` → `ConnectorElement` components
-- [ ] Implement `ConnectorElement` as an SVG `<path>` between two shape centers
+- [x] Create `ConnectorLayer` that maps `page.connectors` → `ConnectorElement` components
+- [x] Implement `ConnectorElement` as an SVG `<path>` between two shape centers
   - Straight routing: direct line
   - Right-angle routing: axis-aligned elbow path
-- [ ] Apply `ConnectorStyle` (stroke color, width)
-- [ ] Render arrowheads using SVG `<marker>` + `<defs>` (one marker per `ArrowHeadType`)
-- [ ] Render connector label at path midpoint
-- [ ] On shape hover, show connection point handles (small `<circle>` at N/E/S/W)
-- [ ] Drag from connection handle → in-progress connector line follows mouse
-- [ ] Drop on another shape → dispatch `ADD_CONNECTOR`
+- [x] Apply `ConnectorStyle` (stroke color, width)
+- [x] Render arrowheads using SVG `<marker>` + `<defs>` (one marker per `ArrowHeadType`)
+- [x] Render connector label at path midpoint
+- [x] On shape hover, show connection point handles (small `<circle>` at N/E/S/W)
+- [x] Drag from connection handle → in-progress connector line follows mouse
+- [x] Drop on another shape → dispatch `ADD_CONNECTOR`
 
 ---
 
@@ -174,10 +174,10 @@ All of these depend on T03. T05 and T06 can start simultaneously; the rest depen
 **Depends on:** T07
 **Parallelizable with:** T08, T10
 
-- [ ] Render a bounding-box `<rect>` around the selected shape (dashed stroke, no fill)
-- [ ] Render 8 resize handle `<rect>` elements at corners and edge midpoints
-- [ ] Drag a resize handle → dispatch `RESIZE_SHAPE` (maintain aspect ratio if shift held)
-- [ ] Delete key on selected shape/connector → dispatch `DELETE_SHAPE` / `DELETE_CONNECTOR`
+- [x] Render a bounding-box `<rect>` around the selected shape (dashed stroke, no fill)
+- [x] Render 8 resize handle `<rect>` elements at corners and edge midpoints
+- [x] Drag a resize handle → dispatch `RESIZE_SHAPE` (maintain aspect ratio if shift held)
+- [x] Delete key on selected shape/connector → dispatch `DELETE_SHAPE` / `DELETE_CONNECTOR`
 
 ---
 
@@ -185,13 +185,13 @@ All of these depend on T03. T05 and T06 can start simultaneously; the rest depen
 **Depends on:** T05
 **Parallelizable with:** T07, T08, T09
 
-- [ ] Render panel on the right side, visible when a shape is selected
-- [ ] Style section: color pickers for `fillColor`, `strokeColor`, `fontColor`; inputs for `strokeWidth`, `fontSize`; toggles for `bold`, `italic`; select for `textAlign`
+- [x] Render panel on the right side, visible when a shape is selected
+- [x] Style section: color pickers for `fillColor`, `strokeColor`, `fontColor`; inputs for `strokeWidth`, `fontSize`; toggles for `bold`, `italic`; select for `textAlign`
   - Each change dispatches `UPDATE_STYLE`
-- [ ] Custom properties section: editable key-value list from `shape.properties`
+- [x] Custom properties section: editable key-value list from `shape.properties`
   - Add row → dispatches `SET_PROPERTY`
   - Remove row → dispatches `DELETE_PROPERTY`
-- [ ] Show connector properties (stroke color, width, arrow types) when connector is selected
+- [x] Show connector properties (stroke color, width, arrow types) when connector is selected
 
 ---
 
@@ -199,8 +199,8 @@ All of these depend on T03. T05 and T06 can start simultaneously; the rest depen
 **Depends on:** T04
 **Parallelizable with:** T03, T05, T06, T07, T08, T09, T10
 
-- [ ] Create `src/services/DiagramMapper.ts`
-- [ ] Implement `DiagramMapper.toVsdx(doc: DiagramDocument): Promise<Buffer>`
+- [x] Create `src/services/DiagramMapper.ts`
+- [x] Implement `DiagramMapper.toVsdx(doc: DiagramDocument): Promise<Buffer>`
   - Create `VisioDocument`
   - Set document metadata
   - For each page: add page, iterate shapes and connectors
@@ -209,7 +209,7 @@ All of these depend on T03. T05 and T06 can start simultaneously; the rest depen
   - Map `properties` → custom shape data cells
   - Map connectors via shape ID lookup → `fromShape.connectTo()`
   - Map `ArrowHeadType` → ts-visio `ArrowHeads` enum
-- [ ] Write unit test with a minimal fixture document — assert buffer is non-empty
+- [x] Write unit test with a minimal fixture document — assert buffer is non-empty
 
 ---
 
@@ -217,15 +217,15 @@ All of these depend on T03. T05 and T06 can start simultaneously; the rest depen
 **Depends on:** T11
 **Parallelizable with:** T03–T10
 
-- [ ] Create `src/routes/health.ts` — returns `{ status: "ok" }`
-- [ ] Create `src/routes/export.ts`:
+- [x] Create `src/routes/health.ts` — returns `{ status: "ok" }`
+- [x] Create `src/routes/export.ts`:
   - `POST /export/vsdx`
   - Validate body with `DiagramDocumentSchema.parse()` → 422 on failure
   - Call `DiagramMapper.toVsdx()` → 500 on error
   - Stream buffer as `application/vnd.ms-visio.drawing` with `Content-Disposition`
-- [ ] Create `src/middleware/errorHandler.ts` — global Express error handler
-- [ ] Mount both routes in `src/index.ts`
-- [ ] Write integration test with `supertest` — POST a valid fixture, assert 200 + binary content-type
+- [x] Create `src/middleware/errorHandler.ts` — global Express error handler
+- [x] Mount both routes in `src/index.ts`
+- [x] Write integration test with `supertest` — POST a valid fixture, assert 200 + binary content-type
 
 ---
 
@@ -239,9 +239,9 @@ These require both frontend (T05+) and backend (T12) to be done.
 **Depends on:** T05
 **Parallelizable with:** T14, T15 (no backend needed)
 
-- [ ] Subscribe to reducer dispatches; debounce 300ms, serialize `DiagramDocument` to `localStorage`
-- [ ] On app load, read from `localStorage` and restore state (fall back to `createEmptyDocument()`)
-- [ ] Add a "New Diagram" action that clears state (with a confirmation prompt)
+- [x] Subscribe to reducer dispatches; debounce 300ms, serialize `DiagramDocument` to `localStorage`
+- [x] On app load, read from `localStorage` and restore state (fall back to `createEmptyDocument()`)
+- [x] Add a "New Diagram" action that clears state (with a confirmation prompt)
 
 ---
 
@@ -249,11 +249,11 @@ These require both frontend (T05+) and backend (T12) to be done.
 **Depends on:** T05, T12
 **Parallelizable with:** T13, T15
 
-- [ ] Add "Export to Visio" button to Toolbar
-- [ ] On click: `POST /api/v1/export/vsdx` with current `DiagramDocument`
-- [ ] Loading state on button during request
-- [ ] On success: trigger browser download via `URL.createObjectURL(blob)`
-- [ ] On failure: display error toast with message from error envelope
+- [x] Add "Export to Visio" button to Toolbar
+- [x] On click: `POST /api/v1/export/vsdx` with current `DiagramDocument`
+- [x] Loading state on button during request
+- [x] On success: trigger browser download via `URL.createObjectURL(blob)`
+- [x] On failure: display error toast with message from error envelope
 
 ---
 
@@ -261,9 +261,9 @@ These require both frontend (T05+) and backend (T12) to be done.
 **Depends on:** T04, T03
 **Parallelizable with:** T13, T14
 
-- [ ] Poll `GET /api/v1/health` every 5 seconds from the frontend
-- [ ] If unreachable: show a warning banner ("Backend offline — export unavailable") and disable Export button
-- [ ] If recovered: dismiss banner automatically
+- [x] Poll `GET /api/v1/health` every 5 seconds from the frontend
+- [x] If unreachable: show a warning banner ("Backend offline — export unavailable") and disable Export button
+- [x] If recovered: dismiss banner automatically
 
 ---
 
@@ -271,9 +271,9 @@ These require both frontend (T05+) and backend (T12) to be done.
 **Depends on:** T05, T06
 **Parallelizable with:** T07, T08, T09, T10**
 
-- [ ] Render a vertical toolbar on the left with one tile per `ShapeType`
-- [ ] Each tile is a miniature SVG preview of the shape
-- [ ] Drag a tile onto the canvas → on drop, convert pixel drop coords to inches, dispatch `ADD_SHAPE` with default size (1" × 1") and style
+- [x] Render a vertical toolbar on the left with one tile per `ShapeType`
+- [x] Each tile is a miniature SVG preview of the shape
+- [x] Drag a tile onto the canvas → on drop, convert pixel drop coords to inches, dispatch `ADD_SHAPE` with default size (1" × 1") and style
 
 ---
 

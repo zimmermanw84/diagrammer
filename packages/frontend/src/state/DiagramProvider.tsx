@@ -2,6 +2,7 @@ import React, { createContext, useContext, useReducer } from "react";
 import type { DiagramAction } from "./actions.js";
 import { diagramReducer, createInitialState } from "./reducer.js";
 import type { State } from "./reducer.js";
+import { usePersistence } from "./persistence.js";
 
 interface DiagramContextValue {
   state: State;
@@ -12,6 +13,7 @@ const DiagramContext = createContext<DiagramContextValue | null>(null);
 
 export function DiagramProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(diagramReducer, undefined, createInitialState);
+  usePersistence(state.document);
   return (
     <DiagramContext.Provider value={{ state, dispatch }}>
       {children}
