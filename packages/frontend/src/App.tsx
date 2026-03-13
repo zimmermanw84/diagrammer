@@ -7,7 +7,9 @@ import { ConnectorDrawing, resolveConnectionPoint } from "./canvas/ConnectorDraw
 import { SelectionOverlay } from "./canvas/SelectionOverlay.js";
 import { useKeyboardShortcuts } from "./canvas/useKeyboardShortcuts.js";
 import { PropertiesPanel } from "./properties/PropertiesPanel.js";
-import { DEFAULT_CONNECTOR_STYLE } from "@diagrammer/shared";
+import { DEFAULT_CONNECTOR_STYLE, DEFAULT_SHAPE_STYLE } from "@diagrammer/shared";
+import type { ShapeType } from "@diagrammer/shared";
+import { ShapePalette } from "./toolbar/ShapePalette.js";
 import type { InProgress } from "./canvas/ConnectorDrawing.js";
 import type { ConnectionPoint } from "./canvas/shapes/ConnectionHandles.js";
 
@@ -49,8 +51,25 @@ function DiagramEditor() {
   return (
     <div style={styles.shell}>
       <div style={styles.toolbar}>
-        <strong>Toolbar</strong>
-        <p style={styles.hint}>Shape palette — T16</p>
+        <ShapePalette
+          svgRef={svgRef}
+          transform={transform}
+          onAddShape={(type: ShapeType, x: number, y: number) =>
+            dispatch({
+              type: "ADD_SHAPE",
+              payload: {
+                type,
+                x,
+                y,
+                width: 1,
+                height: 1,
+                label: "",
+                style: { ...DEFAULT_SHAPE_STYLE },
+                properties: {},
+              },
+            })
+          }
+        />
       </div>
 
       <div style={styles.canvas}>
@@ -132,10 +151,5 @@ const styles: Record<string, React.CSSProperties> = {
     padding: "16px",
     borderLeft: "1px solid #313244",
     overflowY: "auto",
-  },
-  hint: {
-    color: "#6c6f85",
-    fontSize: "12px",
-    marginTop: "8px",
   },
 };
