@@ -139,7 +139,7 @@ export function Canvas({ page, children, onDeselect, svgRef: externalRef, onTran
       onMouseMove={onMouseMove}
       onMouseUp={onMouseUp}
       onMouseLeave={onMouseUp}
-      onClick={(e) => { if (e.target === e.currentTarget) onDeselect?.(); }}
+      onClick={() => onDeselect?.()}
     >
       <defs>
         <filter id="shape-shadow" x="-20%" y="-20%" width="140%" height="140%">

@@ -10,6 +10,7 @@ function renderShape(props: Partial<Parameters<typeof ShapeElement>[0]> = {}) {
     onSelect: vi.fn(),
     onMove: vi.fn(),
     onLabelChange: vi.fn(),
+    onStartConnect: vi.fn(),
   };
   return render(<svg><ShapeElement {...defaults} {...props} /></svg>);
 }
@@ -73,5 +74,33 @@ describe("ShapeElement", () => {
   it("does not render label text when label is empty", () => {
     const { container } = renderShape({ shape: makeShape({ label: "" }) });
     expect(container.querySelector("text")).toBeNull();
+  });
+
+  it("click does not propagate to parent (prevents canvas deselect)", () => {
+    const parentClick = vi.fn();
+    const { container } = render(
+      <svg onClick={parentClick}>
+        <ShapeElement
+          shape={makeShape()}
+          isSelected={false}
+          onSelect={vi.fn()}
+          onMove={vi.fn()}
+          onLabelChange={vi.fn()}
+          onStartConnect={vi.fn()}
+        />
+      </svg>
+    );
+    fireEvent.click(container.querySelector("g")!);
+    expect(parentClick).not.toHaveBeenCalled();
+  });
+
+  it("renders connection handles when isSelected is true", () => {
+    const { container } = renderShape({ isSelected: true });
+    expect(container.querySelectorAll("circle").length).toBeGreaterThan(0);
+  });
+
+  it("does not render connection handles when not selected and not hovered", () => {
+    const { container } = renderShape({ isSelected: false });
+    expect(container.querySelectorAll("circle").length).toBe(0);
   });
 });

@@ -10,7 +10,7 @@ interface ConnectionHandlesProps {
   onStartConnect: (point: ConnectionPoint) => void;
 }
 
-const HANDLE_RADIUS = 5;
+const HANDLE_RADIUS = 6;
 
 export function ConnectionHandles({ width: w, height: h, visible, onStartConnect }: ConnectionHandlesProps) {
   if (!visible) return null;

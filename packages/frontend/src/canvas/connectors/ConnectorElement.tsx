@@ -18,18 +18,44 @@ function center(shape: DiagramShape) {
   };
 }
 
+/**
+ * Returns the point on the shape's rectangular border that is closest to
+ * (towardX, towardY), i.e. where a ray from the shape center toward that
+ * point exits the bounding box.
+ */
+function shapeEdgePoint(
+  shape: DiagramShape,
+  towardX: number,
+  towardY: number
+): { x: number; y: number } {
+  const cx = toPixels(shape.x + shape.width / 2);
+  const cy = toPixels(shape.y + shape.height / 2);
+  const hw = toPixels(shape.width / 2);
+  const hh = toPixels(shape.height / 2);
+
+  const dx = towardX - cx;
+  const dy = towardY - cy;
+
+  if (Math.abs(dx) < 0.001 && Math.abs(dy) < 0.001) return { x: cx, y: cy };
+
+  const tx = Math.abs(dx) > 0.001 ? hw / Math.abs(dx) : Infinity;
+  const ty = Math.abs(dy) > 0.001 ? hh / Math.abs(dy) : Infinity;
+  const t = Math.min(tx, ty);
+
+  return { x: cx + dx * t, y: cy + dy * t };
+}
+
 function buildPath(
   from: { x: number; y: number },
   to: { x: number; y: number },
-  routing: DiagramConnector["routing"]
+  routing: DiagramConnector["routing"],
+  midX: number
 ): string {
   switch (routing) {
     case "straight":
       return `M ${from.x},${from.y} L ${to.x},${to.y}`;
-    case "right_angle": {
-      const midX = (from.x + to.x) / 2;
+    case "right_angle":
       return `M ${from.x},${from.y} L ${midX},${from.y} L ${midX},${to.y} L ${to.x},${to.y}`;
-    }
     case "curved": {
       const dy = (to.y - from.y) / 2;
       return `M ${from.x},${from.y} C ${from.x},${from.y + dy} ${to.x},${to.y - dy} ${to.x},${to.y}`;
@@ -54,10 +80,11 @@ function ArrowMarkers({ connectorId, strokeColor }: { connectorId: string; strok
       <marker id={markerId("filled", connectorId)} markerWidth={MARKER_SIZE} markerHeight={MARKER_SIZE} refX={9} refY={5} orient="auto">
         <polygon points="1,1 9,5 1,9" fill={strokeColor} />
       </marker>
-      {/* crowsfoot */}
+      {/* crowsfoot: three lines radiating from a single tip point */}
       <marker id={markerId("crowsfoot", connectorId)} markerWidth={MARKER_SIZE} markerHeight={MARKER_SIZE} refX={9} refY={5} orient="auto">
-        <polyline points="1,1 9,5 1,9" fill="none" stroke={strokeColor} strokeWidth={1.5} />
+        <line x1={1} y1={1} x2={9} y2={5} stroke={strokeColor} strokeWidth={1.5} />
         <line x1={1} y1={5} x2={9} y2={5} stroke={strokeColor} strokeWidth={1.5} />
+        <line x1={1} y1={9} x2={9} y2={5} stroke={strokeColor} strokeWidth={1.5} />
       </marker>
       {/* one (perpendicular line) */}
       <marker id={markerId("one", connectorId)} markerWidth={MARKER_SIZE} markerHeight={MARKER_SIZE} refX={5} refY={5} orient="auto">
@@ -73,16 +100,22 @@ function markerUrl(type: ArrowHeadType, connectorId: string): string | undefined
 }
 
 export function ConnectorElement({ connector, fromShape, toShape, isSelected, onSelect }: ConnectorElementProps) {
-  const from = center(fromShape);
-  const to = center(toShape);
-  const d = buildPath(from, to, connector.routing);
+  const fromCenter = center(fromShape);
+  const toCenter = center(toShape);
 
+  // Path endpoints at shape borders so arrowheads aren't hidden inside shapes
+  const from = shapeEdgePoint(fromShape, toCenter.x, toCenter.y);
+  const to = shapeEdgePoint(toShape, fromCenter.x, fromCenter.y);
+
+  // Midpoint of the center-to-center line (for right_angle elbow + label)
+  const midX = (fromCenter.x + toCenter.x) / 2;
+  const midY = (fromCenter.y + toCenter.y) / 2;
+
+  const d = buildPath(from, to, connector.routing, midX);
   const { strokeColor, strokeWidth, strokeDash, arrowStart, arrowEnd } = connector.style;
-  const midX = (from.x + to.x) / 2;
-  const midY = (from.y + to.y) / 2;
 
   return (
-    <g data-connector={connector.id} onClick={() => onSelect(connector.id)}>
+    <g data-connector={connector.id} onClick={(e) => { e.stopPropagation(); onSelect(connector.id); }}>
       <ArrowMarkers connectorId={connector.id} strokeColor={strokeColor} />
 
       {/* invisible wide hit area */}
@@ -120,3 +153,5 @@ export function ConnectorElement({ connector, fromShape, toShape, isSelected, on
     </g>
   );
 }
+
+export { shapeEdgePoint };

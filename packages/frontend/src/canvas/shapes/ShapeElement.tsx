@@ -17,7 +17,7 @@ interface ShapeElementProps {
 
 export function ShapeElement({
   shape,
-  isSelected: _isSelected,
+  isSelected,
   onSelect,
   onMove,
   onLabelChange,
@@ -86,6 +86,7 @@ export function ShapeElement({
       transform={`translate(${x}, ${y})`}
       style={{ cursor: editing ? "text" : "move" }}
       onMouseDown={onMouseDown}
+      onClick={(e) => e.stopPropagation()}
       onDoubleClick={onDoubleClick}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
@@ -95,7 +96,7 @@ export function ShapeElement({
       <ConnectionHandles
         width={w}
         height={h}
-        visible={hovered && !editing}
+        visible={(hovered || isSelected) && !editing}
         onStartConnect={(pt) => onStartConnect(shape.id, pt)}
       />
 
