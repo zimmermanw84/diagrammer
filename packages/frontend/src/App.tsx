@@ -18,7 +18,9 @@ import type { ConnectionPoint } from "./canvas/shapes/ConnectionHandles.js";
 
 function DiagramEditor() {
   const { state, dispatch } = useDiagram();
-  const activePage = state.document.pages.find((p) => p.id === state.activePageId)!;
+  const activePage = (
+    state.document.pages.find((p) => p.id === state.activePageId) ?? state.document.pages[0]
+  )!;
   const svgRef = useRef<SVGSVGElement>(null);
   const [transform, setTransform] = useState({ scale: 1, x: 0, y: 0 });
   const [inProgress, setInProgress] = useState<InProgress | null>(null);

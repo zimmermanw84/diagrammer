@@ -86,11 +86,15 @@ export function diagramReducer(state: State, action: DiagramAction): State {
       const { id } = action.payload;
       return {
         ...state,
+        selection: state.selection === id ? null : state.selection,
         document: {
           ...state.document,
           pages: updatePage(state.document.pages, state.activePageId, (page) => ({
             ...page,
             shapes: page.shapes.filter((shape) => shape.id !== id),
+            connectors: page.connectors.filter(
+              (c) => c.fromShapeId !== id && c.toShapeId !== id
+            ),
           })),
         },
       };

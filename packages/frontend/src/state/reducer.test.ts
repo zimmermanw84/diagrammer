@@ -165,6 +165,55 @@ describe("DELETE_SHAPE", () => {
     expect(state.document.pages[0].shapes).toHaveLength(1);
     expect(state.document.pages[0].shapes[0].id).toBe(id2);
   });
+
+  it("removes connectors attached to the deleted shape", () => {
+    let state = createInitialState();
+    state = dispatch(state, { type: "ADD_SHAPE", payload: makeShapePayload() });
+    state = dispatch(state, { type: "ADD_SHAPE", payload: makeShapePayload() });
+    const [id1, id2] = state.document.pages[0].shapes.map((s) => s.id);
+    state = dispatch(state, { type: "ADD_CONNECTOR", payload: makeConnectorPayload(id1, id2) });
+    expect(state.document.pages[0].connectors).toHaveLength(1);
+
+    state = dispatch(state, { type: "DELETE_SHAPE", payload: { id: id1 } });
+    expect(state.document.pages[0].connectors).toHaveLength(0);
+  });
+
+  it("removes connectors where the deleted shape is the target", () => {
+    let state = createInitialState();
+    state = dispatch(state, { type: "ADD_SHAPE", payload: makeShapePayload() });
+    state = dispatch(state, { type: "ADD_SHAPE", payload: makeShapePayload() });
+    const [id1, id2] = state.document.pages[0].shapes.map((s) => s.id);
+    state = dispatch(state, { type: "ADD_CONNECTOR", payload: makeConnectorPayload(id1, id2) });
+
+    state = dispatch(state, { type: "DELETE_SHAPE", payload: { id: id2 } });
+    expect(state.document.pages[0].connectors).toHaveLength(0);
+  });
+
+  it("preserves connectors between other shapes", () => {
+    let state = createInitialState();
+    state = dispatch(state, { type: "ADD_SHAPE", payload: makeShapePayload() });
+    state = dispatch(state, { type: "ADD_SHAPE", payload: makeShapePayload() });
+    state = dispatch(state, { type: "ADD_SHAPE", payload: makeShapePayload() });
+    const [id1, id2, id3] = state.document.pages[0].shapes.map((s) => s.id);
+    state = dispatch(state, { type: "ADD_CONNECTOR", payload: makeConnectorPayload(id1, id2) });
+    state = dispatch(state, { type: "ADD_CONNECTOR", payload: makeConnectorPayload(id2, id3) });
+
+    // Delete id1 — only the id1→id2 connector should go
+    state = dispatch(state, { type: "DELETE_SHAPE", payload: { id: id1 } });
+    expect(state.document.pages[0].connectors).toHaveLength(1);
+    expect(state.document.pages[0].connectors[0].fromShapeId).toBe(id2);
+  });
+
+  it("clears selection when the selected shape is deleted", () => {
+    let state = createInitialState();
+    state = dispatch(state, { type: "ADD_SHAPE", payload: makeShapePayload() });
+    const shapeId = state.document.pages[0].shapes[0].id;
+    state = dispatch(state, { type: "SELECT", payload: { id: shapeId } });
+    expect(state.selection).toBe(shapeId);
+
+    state = dispatch(state, { type: "DELETE_SHAPE", payload: { id: shapeId } });
+    expect(state.selection).toBeNull();
+  });
 });
 
 describe("SET_LABEL", () => {

@@ -1,4 +1,5 @@
 import type { ShapeStyle } from "@diagrammer/shared";
+import { StrokeDashSchema, TextAlignSchema } from "@diagrammer/shared";
 
 interface StyleEditorProps {
   style: ShapeStyle;
@@ -19,7 +20,10 @@ export function StyleEditor({ style, onChange }: StyleEditorProps) {
           onChange={(e) => onChange({ strokeWidth: Number(e.target.value) })} style={inputStyle} />
       </Row>
       <Row label="Stroke dash">
-        <select value={style.strokeDash} onChange={(e) => onChange({ strokeDash: e.target.value as ShapeStyle["strokeDash"] })} style={inputStyle}>
+        <select value={style.strokeDash} onChange={(e) => {
+          const parsed = StrokeDashSchema.safeParse(e.target.value);
+          if (parsed.success) onChange({ strokeDash: parsed.data });
+        }} style={inputStyle}>
           <option value="solid">Solid</option>
           <option value="dashed">Dashed</option>
           <option value="dotted">Dotted</option>
@@ -42,7 +46,10 @@ export function StyleEditor({ style, onChange }: StyleEditorProps) {
         <input type="checkbox" checked={style.italic} onChange={(e) => onChange({ italic: e.target.checked })} />
       </Row>
       <Row label="Text align">
-        <select value={style.textAlign} onChange={(e) => onChange({ textAlign: e.target.value as ShapeStyle["textAlign"] })} style={inputStyle}>
+        <select value={style.textAlign} onChange={(e) => {
+          const parsed = TextAlignSchema.safeParse(e.target.value);
+          if (parsed.success) onChange({ textAlign: parsed.data });
+        }} style={inputStyle}>
           <option value="left">Left</option>
           <option value="center">Center</option>
           <option value="right">Right</option>

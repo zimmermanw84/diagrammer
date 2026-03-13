@@ -5,7 +5,9 @@ import { CustomProperties } from "./CustomProperties.js";
 
 export function PropertiesPanel() {
   const { state, dispatch } = useDiagram();
-  const activePage = state.document.pages.find((p) => p.id === state.activePageId)!;
+  const activePage = (
+    state.document.pages.find((p) => p.id === state.activePageId) ?? state.document.pages[0]
+  )!;
   const { selection } = state;
 
   if (!selection) {
