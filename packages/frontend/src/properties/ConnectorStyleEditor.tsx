@@ -1,4 +1,5 @@
 import type { ConnectorStyle, ArrowHeadType } from "@diagrammer/shared";
+import { StrokeDashSchema, ArrowHeadTypeSchema } from "@diagrammer/shared";
 
 interface ConnectorStyleEditorProps {
   style: ConnectorStyle;
@@ -24,19 +25,28 @@ export function ConnectorStyleEditor({ style, onChange }: ConnectorStyleEditorPr
           onChange={(e) => onChange({ strokeWidth: Number(e.target.value) })} style={inputStyle} />
       </Row>
       <Row label="Dash">
-        <select value={style.strokeDash} onChange={(e) => onChange({ strokeDash: e.target.value as ConnectorStyle["strokeDash"] })} style={inputStyle}>
+        <select value={style.strokeDash} onChange={(e) => {
+          const parsed = StrokeDashSchema.safeParse(e.target.value);
+          if (parsed.success) onChange({ strokeDash: parsed.data });
+        }} style={inputStyle}>
           <option value="solid">Solid</option>
           <option value="dashed">Dashed</option>
           <option value="dotted">Dotted</option>
         </select>
       </Row>
       <Row label="Arrow start">
-        <select value={style.arrowStart} onChange={(e) => onChange({ arrowStart: e.target.value as ArrowHeadType })} style={inputStyle}>
+        <select value={style.arrowStart} onChange={(e) => {
+          const parsed = ArrowHeadTypeSchema.safeParse(e.target.value);
+          if (parsed.success) onChange({ arrowStart: parsed.data });
+        }} style={inputStyle}>
           {ARROW_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
         </select>
       </Row>
       <Row label="Arrow end">
-        <select value={style.arrowEnd} onChange={(e) => onChange({ arrowEnd: e.target.value as ArrowHeadType })} style={inputStyle}>
+        <select value={style.arrowEnd} onChange={(e) => {
+          const parsed = ArrowHeadTypeSchema.safeParse(e.target.value);
+          if (parsed.success) onChange({ arrowEnd: parsed.data });
+        }} style={inputStyle}>
           {ARROW_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
         </select>
       </Row>

@@ -43,4 +43,22 @@ describe("StyleEditor", () => {
     fireEvent.change(textAlignSelect, { target: { value: "right" } });
     expect(onChange).toHaveBeenCalledWith({ textAlign: "right" });
   });
+
+  it("ignores invalid strokeDash values", () => {
+    const onChange = vi.fn();
+    const { container } = render(<StyleEditor style={{ ...DEFAULT_SHAPE_STYLE }} onChange={onChange} />);
+    const selects = container.querySelectorAll("select");
+    const strokeDashSelect = selects[0]!;
+    fireEvent.change(strokeDashSelect, { target: { value: "invalid-dash" } });
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it("ignores invalid textAlign values", () => {
+    const onChange = vi.fn();
+    const { container } = render(<StyleEditor style={{ ...DEFAULT_SHAPE_STYLE }} onChange={onChange} />);
+    const selects = container.querySelectorAll("select");
+    const textAlignSelect = selects[selects.length - 1]!;
+    fireEvent.change(textAlignSelect, { target: { value: "justify" } });
+    expect(onChange).not.toHaveBeenCalled();
+  });
 });
