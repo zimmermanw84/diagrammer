@@ -196,6 +196,34 @@ describe("Canvas — zoom", () => {
 });
 
 // ---------------------------------------------------------------------------
+// Deselect
+// ---------------------------------------------------------------------------
+
+describe("Canvas — deselect", () => {
+  it("calls onDeselect when the SVG itself is clicked", () => {
+    const onDeselect = vi.fn();
+    const { container } = render(<Canvas page={PAGE} onDeselect={onDeselect} />);
+    fireEvent.click(container.querySelector("svg")!);
+    expect(onDeselect).toHaveBeenCalledOnce();
+  });
+
+  it("calls onDeselect when a background child element is clicked", () => {
+    const onDeselect = vi.fn();
+    const { container } = render(<Canvas page={PAGE} onDeselect={onDeselect} />);
+    // The page background rect is a direct child of the transform group
+    const rect = container.querySelector("rect")!;
+    fireEvent.click(rect);
+    expect(onDeselect).toHaveBeenCalledOnce();
+  });
+
+  it("does not call onDeselect when no handler is provided", () => {
+    const { container } = render(<Canvas page={PAGE} />);
+    // Should not throw
+    expect(() => fireEvent.click(container.querySelector("svg")!)).not.toThrow();
+  });
+});
+
+// ---------------------------------------------------------------------------
 // Pan (middle-mouse drag)
 // ---------------------------------------------------------------------------
 

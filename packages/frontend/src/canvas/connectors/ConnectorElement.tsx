@@ -80,10 +80,11 @@ function ArrowMarkers({ connectorId, strokeColor }: { connectorId: string; strok
       <marker id={markerId("filled", connectorId)} markerWidth={MARKER_SIZE} markerHeight={MARKER_SIZE} refX={9} refY={5} orient="auto">
         <polygon points="1,1 9,5 1,9" fill={strokeColor} />
       </marker>
-      {/* crowsfoot */}
+      {/* crowsfoot: three lines radiating from a single tip point */}
       <marker id={markerId("crowsfoot", connectorId)} markerWidth={MARKER_SIZE} markerHeight={MARKER_SIZE} refX={9} refY={5} orient="auto">
-        <polyline points="1,1 9,5 1,9" fill="none" stroke={strokeColor} strokeWidth={1.5} />
+        <line x1={1} y1={1} x2={9} y2={5} stroke={strokeColor} strokeWidth={1.5} />
         <line x1={1} y1={5} x2={9} y2={5} stroke={strokeColor} strokeWidth={1.5} />
+        <line x1={1} y1={9} x2={9} y2={5} stroke={strokeColor} strokeWidth={1.5} />
       </marker>
       {/* one (perpendicular line) */}
       <marker id={markerId("one", connectorId)} markerWidth={MARKER_SIZE} markerHeight={MARKER_SIZE} refX={5} refY={5} orient="auto">
@@ -114,7 +115,7 @@ export function ConnectorElement({ connector, fromShape, toShape, isSelected, on
   const { strokeColor, strokeWidth, strokeDash, arrowStart, arrowEnd } = connector.style;
 
   return (
-    <g data-connector={connector.id} onClick={() => onSelect(connector.id)}>
+    <g data-connector={connector.id} onClick={(e) => { e.stopPropagation(); onSelect(connector.id); }}>
       <ArrowMarkers connectorId={connector.id} strokeColor={strokeColor} />
 
       {/* invisible wide hit area */}

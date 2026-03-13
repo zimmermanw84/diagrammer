@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useRef, useEffect } from "react";
 import type { DiagramShape } from "@diagrammer/shared";
 import { DEFAULT_CONNECTOR_STYLE } from "@diagrammer/shared";
 import { toPixels, toInches } from "./units.js";
@@ -21,37 +21,53 @@ interface ConnectorDrawingProps {
 }
 
 export function ConnectorDrawing({ shapes, svgRef, transform, onConnect, inProgress, setInProgress }: ConnectorDrawingProps) {
-  useEffect(() => {
-    if (!inProgress) return;
+  // Use refs so stable listeners always read current values without re-registering
+  const inProgressRef = useRef(inProgress);
+  const shapesRef = useRef(shapes);
+  const transformRef = useRef(transform);
+  const onConnectRef = useRef(onConnect);
+  const setInProgressRef = useRef(setInProgress);
 
+  inProgressRef.current = inProgress;
+  shapesRef.current = shapes;
+  transformRef.current = transform;
+  onConnectRef.current = onConnect;
+  setInProgressRef.current = setInProgress;
+
+  // Register listeners once; use refs to read current values on each event
+  useEffect(() => {
     const onMouseMove = (e: MouseEvent) => {
+      if (!inProgressRef.current) return;
       const svg = svgRef.current;
       if (!svg) return;
+      const t = transformRef.current;
       const rect = svg.getBoundingClientRect();
-      const svgX = (e.clientX - rect.left - transform.x) / transform.scale;
-      const svgY = (e.clientY - rect.top - transform.y) / transform.scale;
-      setInProgress({ ...inProgress, toPoint: { x: svgX, y: svgY } });
+      const svgX = (e.clientX - rect.left - t.x) / t.scale;
+      const svgY = (e.clientY - rect.top - t.y) / t.scale;
+      setInProgressRef.current({ ...inProgressRef.current, toPoint: { x: svgX, y: svgY } });
     };
 
     const onMouseUp = (e: MouseEvent) => {
+      const ip = inProgressRef.current;
+      if (!ip) return;
       const svg = svgRef.current;
       if (!svg) return;
+      const t = transformRef.current;
       const rect = svg.getBoundingClientRect();
-      const svgX = (e.clientX - rect.left - transform.x) / transform.scale;
-      const svgY = (e.clientY - rect.top - transform.y) / transform.scale;
+      const svgX = (e.clientX - rect.left - t.x) / t.scale;
+      const svgY = (e.clientY - rect.top - t.y) / t.scale;
       const inchX = toInches(svgX);
       const inchY = toInches(svgY);
 
-      // Find shape under cursor
-      const target = shapes.find(
+      const target = shapesRef.current.find(
         (s) =>
-          s.id !== inProgress.fromShapeId &&
+          s.id !== ip.fromShapeId &&
           inchX >= s.x && inchX <= s.x + s.width &&
           inchY >= s.y && inchY <= s.y + s.height
       );
 
-      if (target) onConnect(inProgress.fromShapeId, target.id);
-      setInProgress(null);
+      if (target) onConnectRef.current(ip.fromShapeId, target.id);
+      setInProgressRef.current(null);
     };
 
     window.addEventListener("mousemove", onMouseMove);
@@ -60,7 +76,8 @@ export function ConnectorDrawing({ shapes, svgRef, transform, onConnect, inProgr
       window.removeEventListener("mousemove", onMouseMove);
       window.removeEventListener("mouseup", onMouseUp);
     };
-  }, [inProgress, shapes, svgRef, transform, onConnect, setInProgress]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // register once on mount, refs keep values current
 
   if (!inProgress) return null;
 

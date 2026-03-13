@@ -40,6 +40,23 @@ describe("ConnectorElement", () => {
     expect(onSelect).toHaveBeenCalledWith("c1");
   });
 
+  it("click does not propagate to parent (prevents canvas deselect)", () => {
+    const parentClick = vi.fn();
+    const { container } = render(
+      <svg onClick={parentClick}>
+        <ConnectorElement
+          connector={makeConnector()}
+          fromShape={makeShape({ id: "s1", x: 0, y: 0 })}
+          toShape={makeShape({ id: "s2", x: 3, y: 0 })}
+          isSelected={false}
+          onSelect={vi.fn()}
+        />
+      </svg>
+    );
+    fireEvent.click(container.querySelector("g")!);
+    expect(parentClick).not.toHaveBeenCalled();
+  });
+
   it("renders label text when label is set", () => {
     const { getByText } = renderConnector({ connector: makeConnector({ label: "my label" }) });
     expect(getByText("my label")).toBeTruthy();

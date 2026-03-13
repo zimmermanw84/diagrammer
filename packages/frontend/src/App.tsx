@@ -83,8 +83,18 @@ function DiagramEditor() {
             }
           />
           <ConnectorDefaults
-            style={state.defaultConnectorStyle}
-            onChange={(patch) => dispatch({ type: "SET_DEFAULT_CONNECTOR_STYLE", payload: patch })}
+            style={
+              activePage.connectors.find((c) => c.id === state.selection)?.style ??
+              state.defaultConnectorStyle
+            }
+            onChange={(patch) => {
+              const selectedConnector = activePage.connectors.find((c) => c.id === state.selection);
+              if (selectedConnector) {
+                dispatch({ type: "UPDATE_CONNECTOR_STYLE", payload: { id: selectedConnector.id, style: patch } });
+              } else {
+                dispatch({ type: "SET_DEFAULT_CONNECTOR_STYLE", payload: patch });
+              }
+            }}
           />
           <div style={styles.toolbarActions}>
             <div style={styles.undoRedoRow}>
