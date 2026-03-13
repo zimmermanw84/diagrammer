@@ -2,6 +2,7 @@ import { useDiagram } from "../state/index.js";
 import { StyleEditor } from "./StyleEditor.js";
 import { ConnectorStyleEditor } from "./ConnectorStyleEditor.js";
 import { CustomProperties } from "./CustomProperties.js";
+import { THEME } from "../theme.js";
 
 export function PropertiesPanel() {
   const { state, dispatch } = useDiagram();
@@ -57,7 +58,7 @@ export function PropertiesPanel() {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div style={{ marginBottom: 16 }}>
-      <div style={{ fontSize: 11, fontWeight: "bold", color: "#89b4fa", marginBottom: 8, textTransform: "uppercase", letterSpacing: 1 }}>
+      <div style={{ fontSize: 11, fontWeight: "bold", color: THEME.blue, marginBottom: 8, textTransform: "uppercase", letterSpacing: 1 }}>
         {title}
       </div>
       {children}
@@ -66,4 +67,4 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 }
 
 const panelStyle: React.CSSProperties = { padding: "4px 0", overflowY: "auto", height: "100%" };
-const emptyStyle: React.CSSProperties = { color: "#6c6f85", fontSize: 12, padding: "8px 0", margin: 0 };
+const emptyStyle: React.CSSProperties = { color: THEME.overlay2, fontSize: 12, padding: "8px 0", margin: 0 };

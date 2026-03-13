@@ -100,6 +100,26 @@ describe("DiagramMapper.toVsdx", () => {
     expect(buffer.length).toBeGreaterThan(0);
   });
 
+  it("handles a two-page document without error", async () => {
+    const doc: DiagramDocument = {
+      ...FIXTURE,
+      pages: [
+        FIXTURE.pages[0]!,
+        {
+          ...FIXTURE.pages[0]!,
+          id: "00000000-0000-0000-0000-000000000003",
+          name: "Page 2",
+          shapes: [{ ...FIXTURE.pages[0]!.shapes[0]!, id: "00000000-0000-0000-0000-000000000030" }],
+          connectors: [],
+        },
+      ],
+    };
+
+    const buffer = await DiagramMapper.toVsdx(doc);
+    expect(buffer).toBeInstanceOf(Buffer);
+    expect(buffer.length).toBeGreaterThan(0);
+  });
+
   it("handles multiple shape types without throwing", async () => {
     const doc: DiagramDocument = {
       ...FIXTURE,

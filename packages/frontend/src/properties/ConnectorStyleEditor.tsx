@@ -1,5 +1,6 @@
 import type { ConnectorStyle, ArrowHeadType } from "@diagrammer/shared";
 import { StrokeDashSchema, ArrowHeadTypeSchema } from "@diagrammer/shared";
+import { panelInputStyle, panelLabelStyle } from "./panelStyles.js";
 
 interface ConnectorStyleEditorProps {
   style: ConnectorStyle;
@@ -22,13 +23,13 @@ export function ConnectorStyleEditor({ style, onChange }: ConnectorStyleEditorPr
       </Row>
       <Row label="Width">
         <input type="number" min={0.5} max={20} step={0.5} value={style.strokeWidth}
-          onChange={(e) => onChange({ strokeWidth: Number(e.target.value) })} style={inputStyle} />
+          onChange={(e) => onChange({ strokeWidth: Number(e.target.value) })} style={panelInputStyle} />
       </Row>
       <Row label="Dash">
         <select value={style.strokeDash} onChange={(e) => {
           const parsed = StrokeDashSchema.safeParse(e.target.value);
           if (parsed.success) onChange({ strokeDash: parsed.data });
-        }} style={inputStyle}>
+        }} style={panelInputStyle}>
           <option value="solid">Solid</option>
           <option value="dashed">Dashed</option>
           <option value="dotted">Dotted</option>
@@ -38,7 +39,7 @@ export function ConnectorStyleEditor({ style, onChange }: ConnectorStyleEditorPr
         <select value={style.arrowStart} onChange={(e) => {
           const parsed = ArrowHeadTypeSchema.safeParse(e.target.value);
           if (parsed.success) onChange({ arrowStart: parsed.data });
-        }} style={inputStyle}>
+        }} style={panelInputStyle}>
           {ARROW_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
         </select>
       </Row>
@@ -46,7 +47,7 @@ export function ConnectorStyleEditor({ style, onChange }: ConnectorStyleEditorPr
         <select value={style.arrowEnd} onChange={(e) => {
           const parsed = ArrowHeadTypeSchema.safeParse(e.target.value);
           if (parsed.success) onChange({ arrowEnd: parsed.data });
-        }} style={inputStyle}>
+        }} style={panelInputStyle}>
           {ARROW_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
         </select>
       </Row>
@@ -57,10 +58,8 @@ export function ConnectorStyleEditor({ style, onChange }: ConnectorStyleEditorPr
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div style={{ display: "flex", alignItems: "center", marginBottom: 6 }}>
-      <span style={{ width: 90, fontSize: 11, color: "#a6adc8", flexShrink: 0 }}>{label}</span>
+      <span style={panelLabelStyle}>{label}</span>
       {children}
     </div>
   );
 }
-
-const inputStyle: React.CSSProperties = { width: "100%", background: "#313244", border: "1px solid #45475a", color: "#cdd6f4", borderRadius: 3, padding: "2px 4px" };

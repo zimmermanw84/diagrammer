@@ -2,39 +2,8 @@ import { describe, it, expect, beforeEach } from "vitest";
 import { diagramReducer, createInitialState } from "./reducer.js";
 import type { State } from "./reducer.js";
 import type { DiagramAction } from "./actions.js";
-import type { DiagramShape, DiagramConnector } from "@diagrammer/shared";
-import { DEFAULT_SHAPE_STYLE, DEFAULT_CONNECTOR_STYLE } from "@diagrammer/shared";
-
-// Helper: build a minimal shape payload (no id)
-function makeShapePayload(overrides: Partial<Omit<DiagramShape, "id">> = {}): Omit<DiagramShape, "id"> {
-  return {
-    type: "rectangle",
-    x: 10,
-    y: 20,
-    width: 100,
-    height: 50,
-    label: "Test",
-    style: { ...DEFAULT_SHAPE_STYLE },
-    properties: {},
-    ...overrides,
-  };
-}
-
-// Helper: build a minimal connector payload (no id)
-function makeConnectorPayload(
-  fromShapeId: string,
-  toShapeId: string,
-  overrides: Partial<Omit<DiagramConnector, "id">> = {}
-): Omit<DiagramConnector, "id"> {
-  return {
-    fromShapeId,
-    toShapeId,
-    label: "",
-    style: { ...DEFAULT_CONNECTOR_STYLE },
-    routing: "straight",
-    ...overrides,
-  };
-}
+import { DEFAULT_SHAPE_STYLE } from "@diagrammer/shared";
+import { makeShapePayload, makeConnectorPayload } from "../test-utils/fixtures.js";
 
 function dispatch(state: State, action: DiagramAction): State {
   return diagramReducer(state, action);
@@ -410,5 +379,21 @@ describe("Operations on wrong page are no-ops", () => {
   it("SET_LABEL on shape in non-active page is a no-op", () => {
     const next = dispatch(state, { type: "SET_LABEL", payload: { id: page1ShapeId, label: "Changed" } });
     expect(next.document.pages[0].shapes[0].label).toBe("Test");
+  });
+});
+
+describe("RESET", () => {
+  it("returns to a fresh empty document, discarding all shapes and connectors", () => {
+    let state = createInitialState();
+    state = dispatch(state, { type: "ADD_SHAPE", payload: makeShapePayload() });
+    state = dispatch(state, { type: "ADD_SHAPE", payload: makeShapePayload() });
+    expect(state.document.pages[0].shapes).toHaveLength(2);
+
+    state = dispatch(state, { type: "RESET" });
+
+    expect(state.document.pages).toHaveLength(1);
+    expect(state.document.pages[0].shapes).toHaveLength(0);
+    expect(state.document.pages[0].connectors).toHaveLength(0);
+    expect(state.selection).toBeNull();
   });
 });

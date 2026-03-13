@@ -1,6 +1,7 @@
-import { useRef } from "react";
+import { useCallback, useRef, useState } from "react";
 import type { DiagramShape } from "@diagrammer/shared";
 import { toPixels, toInches } from "./units.js";
+import { useWindowEvent } from "./useWindowEvent.js";
 
 interface SelectionOverlayProps {
   shape: DiagramShape;
@@ -41,6 +42,8 @@ export function SelectionOverlay({ shape, onResize }: SelectionOverlayProps) {
   const h = toPixels(shape.height);
   const handles = getHandles(w, h);
 
+  const [isDragging, setIsDragging] = useState(false);
+
   const dragState = useRef<{
     handle: Handle;
     startMx: number;
@@ -61,36 +64,36 @@ export function SelectionOverlay({ shape, onResize }: SelectionOverlayProps) {
       startH: shape.height,
       shiftKey: e.shiftKey,
     };
-
-    const onMouseMove = (me: MouseEvent) => {
-      if (!dragState.current) return;
-      const { handle: h, startMx, startMy, startW, startH, shiftKey } = dragState.current;
-      const dpx = me.clientX - startMx;
-      const dpy = me.clientY - startMy;
-      const di = toInches(dpx);
-      const dj = toInches(dpy);
-
-      let newW = Math.max(MIN_INCHES, startW + di * h.resizeW);
-      let newH = Math.max(MIN_INCHES, startH + dj * h.resizeH);
-
-      // Maintain aspect ratio on corner handles when shift held
-      if (shiftKey && h.resizeW !== 0 && h.resizeH !== 0) {
-        const ratio = startW / startH;
-        newH = newW / ratio;
-      }
-
-      onResize(shape.id, newW, newH);
-    };
-
-    const onMouseUp = () => {
-      dragState.current = null;
-      window.removeEventListener("mousemove", onMouseMove);
-      window.removeEventListener("mouseup", onMouseUp);
-    };
-
-    window.addEventListener("mousemove", onMouseMove);
-    window.addEventListener("mouseup", onMouseUp);
+    setIsDragging(true);
   };
+
+  const onMouseMove = useCallback((me: MouseEvent) => {
+    if (!dragState.current) return;
+    const { handle: hdl, startMx, startMy, startW, startH, shiftKey } = dragState.current;
+    const dpx = me.clientX - startMx;
+    const dpy = me.clientY - startMy;
+    const di = toInches(dpx);
+    const dj = toInches(dpy);
+
+    let newW = Math.max(MIN_INCHES, startW + di * hdl.resizeW);
+    let newH = Math.max(MIN_INCHES, startH + dj * hdl.resizeH);
+
+    // Maintain aspect ratio on corner handles when shift held
+    if (shiftKey && hdl.resizeW !== 0 && hdl.resizeH !== 0) {
+      const ratio = startW / startH;
+      newH = newW / ratio;
+    }
+
+    onResize(shape.id, newW, newH);
+  }, [shape.id, onResize]);
+
+  const onMouseUp = useCallback(() => {
+    dragState.current = null;
+    setIsDragging(false);
+  }, []);
+
+  useWindowEvent("mousemove", onMouseMove, isDragging);
+  useWindowEvent("mouseup", onMouseUp, isDragging);
 
   return (
     <g transform={`translate(${x}, ${y})`} data-selection-overlay>

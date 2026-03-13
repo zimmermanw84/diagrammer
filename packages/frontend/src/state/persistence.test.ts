@@ -46,6 +46,16 @@ describe("loadSavedDocument", () => {
   });
 });
 
+describe("loadSavedDocument (extended)", () => {
+  it("returns null for partially malformed data (wrong type on one field)", () => {
+    const doc = createEmptyDocument("Partial", "Me");
+    // createdAt must be a string (ISO date); setting it to a number should fail schema
+    const malformed = { ...doc, meta: { ...doc.meta, createdAt: 123 } };
+    store[STORAGE_KEY] = JSON.stringify(malformed);
+    expect(loadSavedDocument()).toBeNull();
+  });
+});
+
 describe("usePersistence", () => {
   it("saves the document to localStorage after debounce", async () => {
     const doc = createEmptyDocument("Test", "Me");
@@ -59,6 +69,19 @@ describe("usePersistence", () => {
     expect(store[STORAGE_KEY]).toBeDefined();
     const saved = JSON.parse(store[STORAGE_KEY]!);
     expect(saved.meta.title).toBe("Test");
+  });
+
+  it("silently ignores localStorage.setItem errors", async () => {
+    vi.spyOn(localStorageMock, "setItem").mockImplementationOnce(() => {
+      throw new Error("QuotaExceededError");
+    });
+
+    const doc = createEmptyDocument("Throws", "Me");
+    renderHook(() => usePersistence(doc));
+
+    // Should not throw after debounce fires
+    await act(async () => { vi.advanceTimersByTime(300); });
+    // If we reach here without error the test passes; setItem was called but error swallowed
   });
 
   it("debounces: only the latest value is saved", async () => {

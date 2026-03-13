@@ -1,30 +1,15 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, fireEvent } from "@testing-library/react";
 import { ConnectorElement } from "./ConnectorElement.js";
-import { DEFAULT_CONNECTOR_STYLE, DEFAULT_SHAPE_STYLE } from "@diagrammer/shared";
-import type { DiagramShape, DiagramConnector, RoutingAlgorithm, ArrowHeadType } from "@diagrammer/shared";
-
-function makeShape(id: string, x = 0, y = 0): DiagramShape {
-  return { id, type: "rectangle", x, y, width: 2, height: 1, label: "", style: { ...DEFAULT_SHAPE_STYLE }, properties: {} };
-}
-
-function makeConnector(overrides: Partial<DiagramConnector> = {}): DiagramConnector {
-  return {
-    id: "c1",
-    fromShapeId: "s1",
-    toShapeId: "s2",
-    label: "",
-    style: { ...DEFAULT_CONNECTOR_STYLE },
-    routing: "straight",
-    ...overrides,
-  };
-}
+import { DEFAULT_CONNECTOR_STYLE } from "@diagrammer/shared";
+import type { RoutingAlgorithm, ArrowHeadType } from "@diagrammer/shared";
+import { makeShape, makeConnector } from "../../test-utils/fixtures.js";
 
 function renderConnector(props: Partial<Parameters<typeof ConnectorElement>[0]> = {}) {
   const defaults = {
     connector: makeConnector(),
-    fromShape: makeShape("s1", 0, 0),
-    toShape: makeShape("s2", 3, 0),
+    fromShape: makeShape({ id: "s1", x: 0, y: 0 }),
+    toShape: makeShape({ id: "s2", x: 3, y: 0 }),
     isSelected: false,
     onSelect: vi.fn(),
   };

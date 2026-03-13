@@ -22,7 +22,7 @@ describe("useKeyboardShortcuts", () => {
       connectors: [],
       dispatch,
     }));
-    fireEvent.keyDown(window, { key: "Delete" });
+    fireEvent.keyDown(document.body, { key: "Delete" });
     expect(dispatch).toHaveBeenCalledWith({ type: "DELETE_SHAPE", payload: { id: "s1" } });
   });
 
@@ -34,7 +34,7 @@ describe("useKeyboardShortcuts", () => {
       connectors: [makeConnector("c1")],
       dispatch,
     }));
-    fireEvent.keyDown(window, { key: "Delete" });
+    fireEvent.keyDown(document.body, { key: "Delete" });
     expect(dispatch).toHaveBeenCalledWith({ type: "DELETE_CONNECTOR", payload: { id: "c1" } });
   });
 
@@ -46,7 +46,7 @@ describe("useKeyboardShortcuts", () => {
       connectors: [],
       dispatch,
     }));
-    fireEvent.keyDown(window, { key: "Backspace" });
+    fireEvent.keyDown(document.body, { key: "Backspace" });
     expect(dispatch).toHaveBeenCalledWith({ type: "DELETE_SHAPE", payload: { id: "s1" } });
   });
 
@@ -58,7 +58,7 @@ describe("useKeyboardShortcuts", () => {
       connectors: [],
       dispatch,
     }));
-    fireEvent.keyDown(window, { key: "Delete" });
+    fireEvent.keyDown(document.body, { key: "Delete" });
     expect(dispatch).not.toHaveBeenCalled();
   });
 });

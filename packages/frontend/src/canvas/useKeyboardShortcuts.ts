@@ -15,7 +15,8 @@ export function useKeyboardShortcuts({ selection, shapes, connectors, dispatch }
       if (!selection) return;
       if (e.key !== "Delete" && e.key !== "Backspace") return;
       // Don't fire when typing in an input
-      const tag = (e.target as HTMLElement).tagName;
+      if (!(e.target instanceof HTMLElement)) return;
+      const tag = e.target.tagName;
       if (tag === "INPUT" || tag === "TEXTAREA") return;
 
       if (shapes.some((s) => s.id === selection)) {

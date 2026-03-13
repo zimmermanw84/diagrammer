@@ -1,23 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { ShapeElement } from "./ShapeElement.js";
-import { DEFAULT_SHAPE_STYLE } from "@diagrammer/shared";
-import type { DiagramShape } from "@diagrammer/shared";
-
-function makeShape(overrides: Partial<DiagramShape> = {}): DiagramShape {
-  return {
-    id: "shape-1",
-    type: "rectangle",
-    x: 1,
-    y: 1,
-    width: 2,
-    height: 1,
-    label: "Box",
-    style: { ...DEFAULT_SHAPE_STYLE },
-    properties: {},
-    ...overrides,
-  };
-}
+import { makeShape } from "../../test-utils/fixtures.js";
 
 function renderShape(props: Partial<Parameters<typeof ShapeElement>[0]> = {}) {
   const defaults = {

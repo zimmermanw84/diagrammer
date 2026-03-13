@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
-
-const API_BASE = import.meta.env["VITE_API_URL"] ?? "http://localhost:3001";
+import { API_BASE } from "../config.js";
 const POLL_INTERVAL_MS = 5000;
 const TIMEOUT_MS = 3000;
 

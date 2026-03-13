@@ -96,6 +96,14 @@ describe("ExportButton", () => {
     expect(screen.queryByText("Server error")).toBeNull();
   });
 
+  it("shows error toast when fetch rejects with a network error", async () => {
+    (fetch as ReturnType<typeof vi.fn>).mockRejectedValueOnce(new TypeError("Failed to fetch"));
+    render(<ExportButton doc={doc} />);
+    fireEvent.click(screen.getByRole("button"));
+
+    await waitFor(() => expect(screen.getByText("Failed to fetch")).toBeTruthy());
+  });
+
   it("re-enables the button after the request completes", async () => {
     mockFetchOk();
     render(<ExportButton doc={doc} />);
