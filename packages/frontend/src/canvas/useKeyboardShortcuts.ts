@@ -3,7 +3,7 @@ import type { DiagramShape, DiagramConnector } from "@diagrammer/shared";
 import type { DiagramAction } from "../state/actions.js";
 
 interface UseKeyboardShortcutsArgs {
-  selection: string | null;
+  selection: string[];
   shapes: DiagramShape[];
   connectors: DiagramConnector[];
   dispatch: React.Dispatch<DiagramAction>;
@@ -30,13 +30,15 @@ export function useKeyboardShortcuts({ selection, shapes, connectors, dispatch }
         return;
       }
 
-      if (!selection) return;
+      if (selection.length === 0) return;
       if (e.key !== "Delete" && e.key !== "Backspace") return;
 
-      if (shapes.some((s) => s.id === selection)) {
-        dispatch({ type: "DELETE_SHAPE", payload: { id: selection } });
-      } else if (connectors.some((c) => c.id === selection)) {
-        dispatch({ type: "DELETE_CONNECTOR", payload: { id: selection } });
+      for (const id of selection) {
+        if (shapes.some((s) => s.id === id)) {
+          dispatch({ type: "DELETE_SHAPE", payload: { id } });
+        } else if (connectors.some((c) => c.id === id)) {
+          dispatch({ type: "DELETE_CONNECTOR", payload: { id } });
+        }
       }
     };
 

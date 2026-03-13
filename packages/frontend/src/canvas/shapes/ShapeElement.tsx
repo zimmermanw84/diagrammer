@@ -9,7 +9,7 @@ import type { ConnectionPoint } from "./ConnectionHandles.js";
 interface ShapeElementProps {
   shape: DiagramShape;
   isSelected: boolean;
-  onSelect: (id: string) => void;
+  onSelect: (id: string, multi?: boolean) => void;
   onMove: (id: string, dx: number, dy: number) => void;
   onLabelChange: (id: string, label: string) => void;
   onStartConnect: (shapeId: string, point: ConnectionPoint) => void;
@@ -39,7 +39,7 @@ export function ShapeElement({
   const onMouseDown = (e: React.MouseEvent) => {
     if (editing) return;
     e.stopPropagation();
-    onSelect(shape.id);
+    onSelect(shape.id, e.shiftKey);
     dragOrigin.current = { mx: e.clientX, my: e.clientY, sx: shape.x, sy: shape.y };
 
     const onMouseMove = (me: MouseEvent) => {
