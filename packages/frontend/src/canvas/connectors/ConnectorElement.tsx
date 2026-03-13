@@ -18,31 +18,97 @@ function center(shape: DiagramShape) {
   };
 }
 
+type Point = { x: number; y: number };
+
 /**
- * Returns the point on the shape's rectangular border that is closest to
- * (towardX, towardY), i.e. where a ray from the shape center toward that
- * point exits the bounding box.
+ * Find where a ray from (cx, cy) toward (towardX, towardY) first exits a
+ * convex polygon defined by `vertices` (in order). Returns the intersection
+ * point, or the center if none is found (degenerate case).
+ */
+function rayPolygonEdge(
+  cx: number, cy: number,
+  towardX: number, towardY: number,
+  vertices: Point[]
+): Point {
+  const dx = towardX - cx;
+  const dy = towardY - cy;
+  let bestT = Infinity;
+  let best: Point = { x: cx, y: cy };
+
+  for (let i = 0; i < vertices.length; i++) {
+    const a = vertices[i]!;
+    const b = vertices[(i + 1) % vertices.length]!;
+    const abx = b.x - a.x;
+    const aby = b.y - a.y;
+    const cross = dx * aby - dy * abx;
+    if (Math.abs(cross) < 0.0001) continue; // parallel
+    const t = ((a.x - cx) * aby - (a.y - cy) * abx) / cross;
+    const s = ((a.x - cx) * dy - (a.y - cy) * dx) / cross;
+    if (t > 0.0001 && s >= -0.0001 && s <= 1.0001 && t < bestT) {
+      bestT = t;
+      best = { x: cx + dx * t, y: cy + dy * t };
+    }
+  }
+  return best;
+}
+
+/**
+ * Returns the point on the shape's actual visual border where a ray from the
+ * shape center toward (towardX, towardY) exits — accounting for shape type.
  */
 function shapeEdgePoint(
   shape: DiagramShape,
   towardX: number,
   towardY: number
-): { x: number; y: number } {
+): Point {
   const cx = toPixels(shape.x + shape.width / 2);
   const cy = toPixels(shape.y + shape.height / 2);
   const hw = toPixels(shape.width / 2);
   const hh = toPixels(shape.height / 2);
-
   const dx = towardX - cx;
   const dy = towardY - cy;
 
   if (Math.abs(dx) < 0.001 && Math.abs(dy) < 0.001) return { x: cx, y: cy };
 
-  const tx = Math.abs(dx) > 0.001 ? hw / Math.abs(dx) : Infinity;
-  const ty = Math.abs(dy) > 0.001 ? hh / Math.abs(dy) : Infinity;
-  const t = Math.min(tx, ty);
+  switch (shape.type) {
+    case "ellipse": {
+      // Closed-form: point on ellipse at the angle toward target
+      const angle = Math.atan2(dy, dx);
+      return { x: cx + hw * Math.cos(angle), y: cy + hh * Math.sin(angle) };
+    }
 
-  return { x: cx + dx * t, y: cy + dy * t };
+    case "diamond":
+      return rayPolygonEdge(cx, cy, towardX, towardY, [
+        { x: cx,      y: cy - hh },
+        { x: cx + hw, y: cy      },
+        { x: cx,      y: cy + hh },
+        { x: cx - hw, y: cy      },
+      ]);
+
+    case "triangle":
+      return rayPolygonEdge(cx, cy, towardX, towardY, [
+        { x: cx,      y: cy - hh },
+        { x: cx + hw, y: cy + hh },
+        { x: cx - hw, y: cy + hh },
+      ]);
+
+    case "parallelogram": {
+      // offset = shape.width * 0.2 in pixels = hw * 0.4
+      const off = hw * 0.4;
+      return rayPolygonEdge(cx, cy, towardX, towardY, [
+        { x: cx - hw + off, y: cy - hh },
+        { x: cx + hw,       y: cy - hh },
+        { x: cx + hw - off, y: cy + hh },
+        { x: cx - hw,       y: cy + hh },
+      ]);
+    }
+
+    default:
+      // rectangle, rounded_rectangle, image — bounding box intersection
+      const tx = Math.abs(dx) > 0.001 ? hw / Math.abs(dx) : Infinity;
+      const ty = Math.abs(dy) > 0.001 ? hh / Math.abs(dy) : Infinity;
+      return { x: cx + dx * Math.min(tx, ty), y: cy + dy * Math.min(tx, ty) };
+  }
 }
 
 function buildPath(
