@@ -317,10 +317,10 @@ These are independent of each other and can be picked up in any order after Phas
 ### T20 · Shape Libraries / Stencils
 **Depends on:** T16
 
-- [ ] Convert Toolbar into a collapsible Shape Library panel
-- [ ] Define library JSON format: `{ name: string, shapes: ShapeTemplate[] }`
-- [ ] Add built-in libraries: Basic Shapes, Flowchart
-- [ ] Render library sections as collapsible groups with miniature SVG tile previews
+- [x] Convert Toolbar into a collapsible Shape Library panel
+- [x] Define library JSON format: `{ name: string, shapes: ShapeTemplate[] }`
+- [x] Add built-in libraries: Basic Shapes, Flowchart
+- [x] Render library sections as collapsible groups with miniature SVG tile previews
 
 ---
 
