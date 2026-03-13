@@ -2,39 +2,8 @@ import { describe, it, expect, beforeEach } from "vitest";
 import { diagramReducer, createInitialState } from "./reducer.js";
 import type { State } from "./reducer.js";
 import type { DiagramAction } from "./actions.js";
-import type { DiagramShape, DiagramConnector } from "@diagrammer/shared";
-import { DEFAULT_SHAPE_STYLE, DEFAULT_CONNECTOR_STYLE } from "@diagrammer/shared";
-
-// Helper: build a minimal shape payload (no id)
-function makeShapePayload(overrides: Partial<Omit<DiagramShape, "id">> = {}): Omit<DiagramShape, "id"> {
-  return {
-    type: "rectangle",
-    x: 10,
-    y: 20,
-    width: 100,
-    height: 50,
-    label: "Test",
-    style: { ...DEFAULT_SHAPE_STYLE },
-    properties: {},
-    ...overrides,
-  };
-}
-
-// Helper: build a minimal connector payload (no id)
-function makeConnectorPayload(
-  fromShapeId: string,
-  toShapeId: string,
-  overrides: Partial<Omit<DiagramConnector, "id">> = {}
-): Omit<DiagramConnector, "id"> {
-  return {
-    fromShapeId,
-    toShapeId,
-    label: "",
-    style: { ...DEFAULT_CONNECTOR_STYLE },
-    routing: "straight",
-    ...overrides,
-  };
-}
+import { DEFAULT_SHAPE_STYLE } from "@diagrammer/shared";
+import { makeShapePayload, makeConnectorPayload } from "../test-utils/fixtures.js";
 
 function dispatch(state: State, action: DiagramAction): State {
   return diagramReducer(state, action);

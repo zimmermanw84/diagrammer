@@ -1,7 +1,6 @@
 import { useState } from "react";
 import type { DiagramDocument } from "@diagrammer/shared";
-
-const API_BASE = import.meta.env["VITE_API_URL"] ?? "http://localhost:3001";
+import { API_BASE } from "../config.js";
 
 interface ExportButtonProps {
   doc: DiagramDocument;

@@ -13,7 +13,7 @@ This document tracks bugs, type issues, magic constants, code duplication, and t
 
 ---
 
-### B2 · Event listeners not cleaned up on unmount during drag
+### ~~B2 · Event listeners not cleaned up on unmount during drag~~ ✅
 **File:** `packages/frontend/src/canvas/SelectionOverlay.tsx`
 **Issue:** `window.addEventListener` calls inside `onHandleMouseDown` are only cleaned up on `mouseup`. If the component unmounts mid-drag (e.g. the selected shape is deleted via keyboard shortcut while a resize is in progress), the listeners are never removed, leaking memory and potentially firing callbacks on a stale component.
 **Fix:** Move listener registration into a `useEffect` that returns a cleanup function, mirroring the pattern in `ConnectorDrawing.tsx`.
@@ -73,7 +73,7 @@ This document tracks bugs, type issues, magic constants, code duplication, and t
 
 ## Magic Constants
 
-### M1 · Duplicated `API_BASE` constant
+### ~~M1 · Duplicated `API_BASE` constant~~ ✅
 **Files:** `packages/frontend/src/toolbar/ExportButton.tsx:4`, `packages/frontend/src/toolbar/useHealthCheck.ts:3`
 **Fix:** Extract to `packages/frontend/src/config.ts`:
 ```ts
@@ -82,7 +82,7 @@ export const API_BASE = import.meta.env["VITE_API_URL"] ?? "http://localhost:300
 
 ---
 
-### M2 · Duplicated SVG dash-array mapping
+### ~~M2 · Duplicated SVG dash-array mapping~~ ✅
 **Files:** `packages/frontend/src/canvas/shapes/shapeStyle.ts`, `packages/frontend/src/canvas/connectors/ConnectorElement.tsx`
 **Issue:** An identical `DASH_ARRAYS` object (`solid: "none"`, `dashed: "8 4"`, `dotted: "2 4"`) is defined independently in two files.
 **Fix:** Define once in `packages/frontend/src/canvas/canvasConstants.ts` and import in both files.
@@ -105,7 +105,7 @@ export const API_BASE = import.meta.env["VITE_API_URL"] ?? "http://localhost:300
 
 ## Code Duplication
 
-### D1 · Window event listener cleanup pattern repeated in five places
+### ~~D1 · Window event listener cleanup pattern repeated in five places~~ ✅
 **Files:**
 - `packages/frontend/src/canvas/Canvas.tsx`
 - `packages/frontend/src/canvas/SelectionOverlay.tsx`
@@ -131,7 +131,7 @@ function useWindowEvent<K extends keyof WindowEventMap>(
 
 ---
 
-### D2 · Test factory functions duplicated across test files
+### ~~D2 · Test factory functions duplicated across test files~~ ✅
 **Files:**
 - `packages/frontend/src/state/reducer.test.ts` — `makeShapePayload`, `makeConnectorPayload`
 - `packages/frontend/src/canvas/shapes/ShapeElement.test.tsx` — `makeShape`
@@ -228,11 +228,11 @@ function useWindowEvent<K extends keyof WindowEventMap>(
 | ~~🔴 High~~ | ~~B5 — Delete shape cleans up connectors~~ | ~~Small~~ ✅ |
 | ~~🔴 High~~ | ~~B1 — Crash on corrupted `activePageId`~~ | ~~Small~~ ✅ |
 | ~~🔴 High~~ | ~~B3 / T1 — Enum cast validation in property editors~~ | ~~Small~~ ✅ |
-| 🟠 Medium | B2 — Event listener leak on unmount during drag | Small |
-| 🟠 Medium | D1 — `useWindowEvent` hook | Medium |
-| 🟠 Medium | D2 — Shared test fixtures | Small |
-| 🟠 Medium | M1 / B4 — Centralise `API_BASE` | Small |
-| 🟠 Medium | M2 — Centralise SVG dash arrays | Small |
+| ~~🟠 Medium~~ | ~~B2 — Event listener leak on unmount during drag~~ | ~~Small~~ ✅ |
+| ~~🟠 Medium~~ | ~~D1 — `useWindowEvent` hook~~ | ~~Medium~~ ✅ |
+| ~~🟠 Medium~~ | ~~D2 — Shared test fixtures~~ | ~~Small~~ ✅ |
+| ~~🟠 Medium~~ | ~~M1 / B4 — Centralise `API_BASE`~~ | ~~Small~~ ✅ |
+| ~~🟠 Medium~~ | ~~M2 — Centralise SVG dash arrays~~ | ~~Small~~ ✅ |
 | 🟡 Low | M3 — Theme colour constants | Medium |
 | 🟡 Low | D3 — Properties panel shared styles | Small |
 | 🟡 Low | T2 — `e.target` instanceof guard | Trivial |

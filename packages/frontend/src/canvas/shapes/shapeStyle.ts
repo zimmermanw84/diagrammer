@@ -1,10 +1,5 @@
 import type { ShapeStyle } from "@diagrammer/shared";
-
-const DASH_ARRAYS: Record<ShapeStyle["strokeDash"], string> = {
-  solid: "none",
-  dashed: "8 4",
-  dotted: "2 4",
-};
+import { DASH_ARRAYS } from "../canvasConstants.js";
 
 /** Maps a DiagramShape ShapeStyle to SVG presentation attributes. */
 export function toSvgStyle(style: ShapeStyle): React.SVGAttributes<SVGElement> {

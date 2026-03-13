@@ -1,5 +1,6 @@
 import type { DiagramConnector, DiagramShape, ArrowHeadType } from "@diagrammer/shared";
 import { toPixels } from "../units.js";
+import { DASH_ARRAYS } from "../canvasConstants.js";
 
 interface ConnectorElementProps {
   connector: DiagramConnector;
@@ -35,12 +36,6 @@ function buildPath(
     }
   }
 }
-
-const DASH_ARRAYS: Record<string, string> = {
-  solid: "none",
-  dashed: "8 4",
-  dotted: "2 4",
-};
 
 const MARKER_SIZE = 10;
 

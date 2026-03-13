@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useWindowEvent } from "./useWindowEvent.js";
 import type { DiagramPage } from "@diagrammer/shared";
 import { CanvasBackground } from "./CanvasBackground";
 import { toPixels } from "./units";
@@ -78,29 +79,25 @@ export function Canvas({ page, children, onDeselect, svgRef: externalRef, onTran
   }, [onWheel]);
 
   // Space key down/up
-  useEffect(() => {
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.code === "Space" && e.target === document.body) {
-        e.preventDefault();
-        spaceDown.current = true;
-        if (svgRef.current) svgRef.current.style.cursor = "grab";
-      }
-    };
-    const onKeyUp = (e: KeyboardEvent) => {
-      if (e.code === "Space") {
-        spaceDown.current = false;
-        if (!dragging.current && svgRef.current) {
-          svgRef.current.style.cursor = "default";
-        }
-      }
-    };
-    window.addEventListener("keydown", onKeyDown);
-    window.addEventListener("keyup", onKeyUp);
-    return () => {
-      window.removeEventListener("keydown", onKeyDown);
-      window.removeEventListener("keyup", onKeyUp);
-    };
+  const onKeyDown = useCallback((e: KeyboardEvent) => {
+    if (e.code === "Space" && e.target === document.body) {
+      e.preventDefault();
+      spaceDown.current = true;
+      if (svgRef.current) svgRef.current.style.cursor = "grab";
+    }
   }, []);
+
+  const onKeyUp = useCallback((e: KeyboardEvent) => {
+    if (e.code === "Space") {
+      spaceDown.current = false;
+      if (!dragging.current && svgRef.current) {
+        svgRef.current.style.cursor = "default";
+      }
+    }
+  }, []);
+
+  useWindowEvent("keydown", onKeyDown);
+  useWindowEvent("keyup", onKeyUp);
 
   const onMouseDown = useCallback((e: React.MouseEvent<SVGSVGElement>) => {
     const isMiddle = e.button === 1;
