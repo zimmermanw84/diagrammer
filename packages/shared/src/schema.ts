@@ -162,7 +162,15 @@ export function createEmptyDocument(
       },
     ],
     styleSheet: {
-      namedStyles: {},
+      namedStyles: {
+        "Blue": { fillColor: "#89b4fa", strokeColor: "#1e66f5", fontColor: "#1e1e2e" },
+        "Red": { fillColor: "#f38ba8", strokeColor: "#e64553", fontColor: "#1e1e2e" },
+        "Green": { fillColor: "#a6e3a1", strokeColor: "#40a02b", fontColor: "#1e1e2e" },
+        "Yellow": { fillColor: "#f9e2af", strokeColor: "#df8e1d", fontColor: "#1e1e2e" },
+        "Dashed": { strokeDash: "dashed" },
+        "Dotted": { strokeDash: "dotted" },
+        "Shadow": { shadow: true },
+      },
     },
   };
 }
