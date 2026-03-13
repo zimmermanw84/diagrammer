@@ -148,4 +148,95 @@ describe("shapeEdgePoint", () => {
     const pt = shapeEdgePoint(shape, 10000, 50); // nearly horizontal
     expect(pt.x).toBeCloseTo(2 * PPI); // right edge
   });
+
+  // ── ellipse ──────────────────────────────────────────────────────────────
+
+  it("ellipse: exit point lies on the ellipse boundary", () => {
+    // 2×2 circle: cx=96, cy=96, rx=ry=96
+    const shape = makeShape({ x: 0, y: 0, width: 2, height: 2, type: "ellipse" });
+    const pt = shapeEdgePoint(shape, 500, 96); // approach from right, same y
+    const cx = 1 * PPI, cy = 1 * PPI, rx = 1 * PPI, ry = 1 * PPI;
+    // Must satisfy ellipse equation ≈ 1
+    expect((pt.x - cx) ** 2 / rx ** 2 + (pt.y - cy) ** 2 / ry ** 2).toBeCloseTo(1);
+  });
+
+  it("ellipse: exit point is on the right for horizontal approach", () => {
+    const shape = makeShape({ x: 0, y: 0, width: 2, height: 2, type: "ellipse" });
+    const pt = shapeEdgePoint(shape, 5000, 1 * PPI);
+    expect(pt.x).toBeCloseTo(2 * PPI); // rightmost point
+    expect(pt.y).toBeCloseTo(1 * PPI);
+  });
+
+  it("ellipse: exit point is on the top for vertical approach", () => {
+    const shape = makeShape({ x: 0, y: 0, width: 2, height: 2, type: "ellipse" });
+    const pt = shapeEdgePoint(shape, 1 * PPI, -5000);
+    expect(pt.x).toBeCloseTo(1 * PPI);
+    expect(pt.y).toBeCloseTo(0); // topmost point
+  });
+
+  it("ellipse: exit point lies on boundary for a non-square ellipse", () => {
+    // 4×2 ellipse: cx=192, cy=96, rx=192, ry=96
+    const shape = makeShape({ x: 0, y: 0, width: 4, height: 2, type: "ellipse" });
+    const cx = 2 * PPI, cy = 1 * PPI;
+    const rx = 2 * PPI, ry = 1 * PPI;
+    const pt = shapeEdgePoint(shape, cx + 100, cy + 100); // diagonal
+    expect((pt.x - cx) ** 2 / rx ** 2 + (pt.y - cy) ** 2 / ry ** 2).toBeCloseTo(1);
+  });
+
+  // ── diamond ──────────────────────────────────────────────────────────────
+
+  it("diamond: exits at the right vertex when approaching from the right", () => {
+    // 2×2 diamond: cx=96, cy=96, hw=96, hh=96 → right vertex at (192, 96)
+    const shape = makeShape({ x: 0, y: 0, width: 2, height: 2, type: "diamond" });
+    const pt = shapeEdgePoint(shape, 5000, 1 * PPI);
+    expect(pt.x).toBeCloseTo(2 * PPI);
+    expect(pt.y).toBeCloseTo(1 * PPI);
+  });
+
+  it("diamond: exits at the top vertex when approaching from above", () => {
+    const shape = makeShape({ x: 0, y: 0, width: 2, height: 2, type: "diamond" });
+    const pt = shapeEdgePoint(shape, 1 * PPI, -5000);
+    expect(pt.x).toBeCloseTo(1 * PPI);
+    expect(pt.y).toBeCloseTo(0);
+  });
+
+  it("diamond: exit point is inside the bounding box (not on the bbox edge)", () => {
+    // A diagonal approach should NOT land on the bbox corner for a diamond
+    const shape = makeShape({ x: 0, y: 0, width: 2, height: 2, type: "diamond" });
+    // Approach from upper-right at 45°: exits on the top-right edge of the diamond
+    const cx = 1 * PPI, cy = 1 * PPI;
+    const pt = shapeEdgePoint(shape, cx + 1000, cy - 1000);
+    // Should not be at the bbox corner (2*PPI, 0)
+    expect(pt.x).toBeLessThan(2 * PPI);
+    expect(pt.y).toBeGreaterThan(0);
+  });
+
+  // ── triangle ─────────────────────────────────────────────────────────────
+
+  it("triangle: exits at the top vertex when approaching from above", () => {
+    // 2×2 triangle: top=(96,0), br=(192,192), bl=(0,192)
+    const shape = makeShape({ x: 0, y: 0, width: 2, height: 2, type: "triangle" });
+    const pt = shapeEdgePoint(shape, 1 * PPI, -5000);
+    expect(pt.x).toBeCloseTo(1 * PPI);
+    expect(pt.y).toBeCloseTo(0);
+  });
+
+  it("triangle: exits below center when approaching from below", () => {
+    const shape = makeShape({ x: 0, y: 0, width: 2, height: 2, type: "triangle" });
+    const pt = shapeEdgePoint(shape, 1 * PPI, 5000);
+    expect(pt.y).toBeCloseTo(2 * PPI); // bottom edge
+  });
+
+  // ── parallelogram ────────────────────────────────────────────────────────
+
+  it("parallelogram: exits inside the bounding box width (skewed left)", () => {
+    // 2×2 parallelogram: off = 96*0.4 = 38.4px
+    // Top-left vertex: (cx - hw + off, cy - hh) = (96 - 96 + 38.4, 0) = (38.4, 0)
+    const shape = makeShape({ x: 0, y: 0, width: 2, height: 2, type: "parallelogram" });
+    const pt = shapeEdgePoint(shape, 1 * PPI, -5000); // approach from above
+    expect(pt.y).toBeCloseTo(0); // hits the top edge
+    // Top edge goes from x=38.4 to x=192 — exit x should be in that range
+    expect(pt.x).toBeGreaterThan(0);
+    expect(pt.x).toBeLessThanOrEqual(2 * PPI);
+  });
 });
