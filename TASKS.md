@@ -343,6 +343,49 @@ These are independent of each other and can be picked up in any order after Phas
 
 ---
 
+### T23 · Export Filename
+**Depends on:** T14
+**Parallelizable with:** T17–T22
+
+A minor UX improvement: let the user choose the filename before downloading the `.vsdx` file.
+
+- [ ] Add an editable "Filename" field to the document (either as a separate UI input or by promoting `meta.title` as the editable label in the toolbar)
+- [ ] Pre-populate with the current `meta.title` (defaulting to `"diagram"` if blank)
+- [ ] Sanitize the value client-side (strip characters that are invalid in filenames: `/ \ : * ? " < > |`) before passing to `a.download`
+- [ ] Reflect the filename in the `Content-Disposition` header returned by the backend export route (the backend already sanitizes; the frontend name is only used for the anchor download attribute)
+- [ ] Add a test asserting the sanitized filename is applied to the `<a download>` attribute
+
+---
+
+### T24 · Visio Import
+**Depends on:** T04, T05, T12
+**Parallelizable with:** T17–T23
+
+A major feature: allow users to upload an existing `.vsdx` file and have it rendered on the canvas.
+
+**Backend — Parse route:**
+- [ ] Add `POST /api/v1/import/vsdx` route that accepts `multipart/form-data` with a single `.vsdx` file field
+- [ ] Use `ts-visio` to open the uploaded buffer and iterate pages, shapes, and connectors
+- [ ] Map ts-visio shape geometry (center-pin / Y-up) back to schema coordinates (top-left / Y-down in inches)
+- [ ] Map ts-visio shape types to `ShapeType` enum; fall back to `"rectangle"` for unrecognised types
+- [ ] Map ts-visio style properties (fill color, stroke color, line weight, line pattern) to `ShapeStyle`
+- [ ] Map ts-visio connectors (begin/end shape references) to `DiagramConnector`
+- [ ] Return a fully-valid `DiagramDocument` JSON response (validated with `DiagramDocumentSchema`)
+- [ ] Return 422 with a descriptive error body for unsupported or corrupt files
+- [ ] Write integration tests: round-trip (export then re-import a known fixture), empty file, corrupt file
+
+**Frontend — Import UI:**
+- [ ] Add an "Import .vsdx" file input button to the Toolbar (hidden `<input type="file" accept=".vsdx">` triggered by a styled button)
+- [ ] On file selection: `POST /api/v1/import/vsdx` with the file as `FormData`
+- [ ] Loading state on the button during upload/parse
+- [ ] On success: dispatch `LOAD_DOCUMENT` action (new action) to replace the current document; prompt the user to confirm if the canvas is non-empty
+- [ ] On failure: display an error toast with the message from the error envelope
+- [ ] Add reducer support for `LOAD_DOCUMENT` — replaces `state.document`, resets `activePageId` to `pages[0].id`, clears `selection`
+- [ ] Add tests for the `LOAD_DOCUMENT` reducer case
+- [ ] Add component tests for the import button (file selection triggers fetch, loading state, success dispatch, error toast)
+
+---
+
 ## Summary Table
 
 | Task | Description | Depends on | Can parallel with |
@@ -363,9 +406,11 @@ These are independent of each other and can be picked up in any order after Phas
 | T14 | Export button + download UI | T05, T12 | T13, T15 |
 | T15 | Health polling + warning banner | T03, T04 | T13, T14 |
 | T16 | Toolbar + shape palette | T05, T06 | T07–T10 |
-| T17 | Undo / redo | T05 | T18–T22 |
-| T18 | Multi-page UI | T05 | T17, T19–T22 |
-| T19 | Multi-select + alignment | T09 | T17, T18, T20–T22 |
-| T20 | Shape libraries / stencils | T16 | T17–T19, T21–T22 |
-| T21 | Named styles + stroke/shadow | T10 | T17–T20, T22 |
-| T22 | Image embedding | T07, T11 | T17–T21 |
+| T17 | Undo / redo | T05 | T18–T24 |
+| T18 | Multi-page UI | T05 | T17, T19–T24 |
+| T19 | Multi-select + alignment | T09 | T17, T18, T20–T24 |
+| T20 | Shape libraries / stencils | T16 | T17–T19, T21–T24 |
+| T21 | Named styles + stroke/shadow | T10 | T17–T20, T22–T24 |
+| T22 | Image embedding | T07, T11 | T17–T21, T23–T24 |
+| T23 | Export filename | T14 | T17–T22, T24 |
+| T24 | Visio import | T04, T05, T12 | T17–T23 |

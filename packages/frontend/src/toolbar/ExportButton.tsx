@@ -8,9 +8,20 @@ interface ExportButtonProps {
   disabled?: boolean;
 }
 
+/** Strip characters that are invalid in filenames on Windows and Unix. */
+export function sanitizeFilename(name: string): string {
+  return (
+    name
+      .replace(/[/\\:*?"<>|]/g, "")
+      .trim()
+      .replace(/\.+$/, "") || "diagram"
+  );
+}
+
 export function ExportButton({ doc, disabled }: ExportButtonProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [filename, setFilename] = useState(() => sanitizeFilename(doc.meta.title || "diagram"));
 
   const handleExport = async () => {
     setLoading(true);
@@ -32,7 +43,7 @@ export function ExportButton({ doc, disabled }: ExportButtonProps) {
       const url = URL.createObjectURL(blob);
       const a = window.document.createElement("a");
       a.href = url;
-      a.download = `${doc.meta.title || "diagram"}.vsdx`;
+      a.download = `${sanitizeFilename(filename)}.vsdx`;
       a.click();
       URL.revokeObjectURL(url);
     } catch (err) {
@@ -44,6 +55,18 @@ export function ExportButton({ doc, disabled }: ExportButtonProps) {
 
   return (
     <div style={styles.wrapper}>
+      <div style={styles.filenameRow}>
+        <input
+          type="text"
+          value={filename}
+          onChange={(e) => setFilename(e.target.value)}
+          style={styles.filenameInput}
+          placeholder="diagram"
+          aria-label="Export filename"
+          disabled={disabled || loading}
+        />
+        <span style={styles.ext}>.vsdx</span>
+      </div>
       <button
         onClick={handleExport}
         disabled={disabled || loading}
@@ -69,6 +92,26 @@ const styles: Record<string, React.CSSProperties> = {
     display: "flex",
     flexDirection: "column",
     gap: "6px",
+  },
+  filenameRow: {
+    display: "flex",
+    alignItems: "center",
+    gap: "2px",
+  },
+  filenameInput: {
+    flex: 1,
+    minWidth: 0,
+    background: THEME.surface0,
+    border: `1px solid ${THEME.surface1}`,
+    color: THEME.text,
+    borderRadius: 3,
+    padding: "3px 5px",
+    fontSize: "11px",
+  },
+  ext: {
+    fontSize: "11px",
+    color: THEME.subtext0,
+    whiteSpace: "nowrap",
   },
   button: {
     width: "100%",
