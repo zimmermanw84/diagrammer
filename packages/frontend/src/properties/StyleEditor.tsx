@@ -1,5 +1,6 @@
 import type { ShapeStyle } from "@diagrammer/shared";
 import { StrokeDashSchema, TextAlignSchema } from "@diagrammer/shared";
+import { panelInputStyle, panelLabelStyle } from "./panelStyles.js";
 
 interface StyleEditorProps {
   style: ShapeStyle;
@@ -17,24 +18,24 @@ export function StyleEditor({ style, onChange }: StyleEditorProps) {
       </Row>
       <Row label="Stroke width">
         <input type="number" min={0.5} max={20} step={0.5} value={style.strokeWidth}
-          onChange={(e) => onChange({ strokeWidth: Number(e.target.value) })} style={inputStyle} />
+          onChange={(e) => onChange({ strokeWidth: Number(e.target.value) })} style={panelInputStyle} />
       </Row>
       <Row label="Stroke dash">
         <select value={style.strokeDash} onChange={(e) => {
           const parsed = StrokeDashSchema.safeParse(e.target.value);
           if (parsed.success) onChange({ strokeDash: parsed.data });
-        }} style={inputStyle}>
+        }} style={panelInputStyle}>
           <option value="solid">Solid</option>
           <option value="dashed">Dashed</option>
           <option value="dotted">Dotted</option>
         </select>
       </Row>
       <Row label="Font family">
-        <input type="text" value={style.fontFamily} onChange={(e) => onChange({ fontFamily: e.target.value })} style={inputStyle} />
+        <input type="text" value={style.fontFamily} onChange={(e) => onChange({ fontFamily: e.target.value })} style={panelInputStyle} />
       </Row>
       <Row label="Font size">
         <input type="number" min={6} max={72} value={style.fontSize}
-          onChange={(e) => onChange({ fontSize: Number(e.target.value) })} style={inputStyle} />
+          onChange={(e) => onChange({ fontSize: Number(e.target.value) })} style={panelInputStyle} />
       </Row>
       <Row label="Font color">
         <input type="color" value={style.fontColor} onChange={(e) => onChange({ fontColor: e.target.value })} />
@@ -49,7 +50,7 @@ export function StyleEditor({ style, onChange }: StyleEditorProps) {
         <select value={style.textAlign} onChange={(e) => {
           const parsed = TextAlignSchema.safeParse(e.target.value);
           if (parsed.success) onChange({ textAlign: parsed.data });
-        }} style={inputStyle}>
+        }} style={panelInputStyle}>
           <option value="left">Left</option>
           <option value="center">Center</option>
           <option value="right">Right</option>
@@ -65,10 +66,8 @@ export function StyleEditor({ style, onChange }: StyleEditorProps) {
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div style={{ display: "flex", alignItems: "center", marginBottom: 6 }}>
-      <span style={{ width: 90, fontSize: 11, color: "#a6adc8", flexShrink: 0 }}>{label}</span>
+      <span style={panelLabelStyle}>{label}</span>
       {children}
     </div>
   );
 }
-
-const inputStyle: React.CSSProperties = { width: "100%", background: "#313244", border: "1px solid #45475a", color: "#cdd6f4", borderRadius: 3, padding: "2px 4px" };

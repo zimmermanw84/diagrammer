@@ -1,3 +1,5 @@
+import { THEME } from "../theme.js";
+
 export function OfflineBanner() {
   return (
     <div style={styles.banner}>
@@ -13,8 +15,8 @@ const styles: Record<string, React.CSSProperties> = {
     left: 0,
     right: 0,
     zIndex: 1000,
-    background: "#f38ba8",
-    color: "#1e1e2e",
+    background: THEME.red,
+    color: THEME.base,
     textAlign: "center",
     padding: "6px 16px",
     fontSize: "13px",

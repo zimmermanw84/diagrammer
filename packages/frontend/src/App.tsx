@@ -13,6 +13,8 @@ import { ShapePalette } from "./toolbar/ShapePalette.js";
 import { ExportButton } from "./toolbar/ExportButton.js";
 import { OfflineBanner } from "./toolbar/OfflineBanner.js";
 import { useHealthCheck } from "./toolbar/useHealthCheck.js";
+import { DEFAULT_SHAPE_SIZE } from "./canvas/canvasConstants.js";
+import { THEME } from "./theme.js";
 import type { InProgress } from "./canvas/ConnectorDrawing.js";
 import type { ConnectionPoint } from "./canvas/shapes/ConnectionHandles.js";
 
@@ -69,8 +71,8 @@ function DiagramEditor() {
                   type,
                   x,
                   y,
-                  width: 1,
-                  height: 1,
+                  width: DEFAULT_SHAPE_SIZE,
+                  height: DEFAULT_SHAPE_SIZE,
                   label: "",
                   style: { ...DEFAULT_SHAPE_STYLE },
                   properties: {},
@@ -158,10 +160,10 @@ const styles: Record<string, React.CSSProperties> = {
     width: "100vw",
   },
   toolbar: {
-    background: "#1e1e2e",
-    color: "#cdd6f4",
+    background: THEME.base,
+    color: THEME.text,
     padding: "16px",
-    borderRight: "1px solid #313244",
+    borderRight: `1px solid ${THEME.surface0}`,
     display: "flex",
     flexDirection: "column",
     justifyContent: "space-between",
@@ -175,9 +177,9 @@ const styles: Record<string, React.CSSProperties> = {
     width: "100%",
     padding: "8px 12px",
     borderRadius: "6px",
-    border: "1px solid #45475a",
+    border: `1px solid ${THEME.surface1}`,
     background: "transparent",
-    color: "#6c6f85",
+    color: THEME.overlay2,
     fontSize: "12px",
     cursor: "pointer",
   },
@@ -186,10 +188,10 @@ const styles: Record<string, React.CSSProperties> = {
     position: "relative",
   },
   properties: {
-    background: "#1e1e2e",
-    color: "#cdd6f4",
+    background: THEME.base,
+    color: THEME.text,
     padding: "16px",
-    borderLeft: "1px solid #313244",
+    borderLeft: `1px solid ${THEME.surface0}`,
     overflowY: "auto",
   },
 };

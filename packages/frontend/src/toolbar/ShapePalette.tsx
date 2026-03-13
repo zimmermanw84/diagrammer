@@ -1,9 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import type { ShapeType } from "@diagrammer/shared";
-import { DEFAULT_SHAPE_STYLE } from "@diagrammer/shared";
 import { toInches } from "../canvas/units.js";
-
-const DEFAULT_SIZE = 1; // inches
+import { DEFAULT_SHAPE_SIZE } from "../canvas/canvasConstants.js";
+import { THEME } from "../theme.js";
 
 const SHAPES: { type: ShapeType; label: string }[] = [
   { type: "rectangle", label: "Rectangle" },
@@ -16,8 +15,8 @@ const SHAPES: { type: ShapeType; label: string }[] = [
 
 // Miniature SVG preview for each shape type — 40×30 viewBox
 function ShapePreview({ type }: { type: ShapeType }) {
-  const fill = "#313244";
-  const stroke = "#89b4fa";
+  const fill = THEME.surface0;
+  const stroke = THEME.blue;
   const sw = 1.5;
 
   switch (type) {
@@ -71,8 +70,8 @@ export function ShapePalette({ svgRef, transform, onAddShape }: ShapePaletteProp
         const rect = svg.getBoundingClientRect();
         const svgX = (e.clientX - rect.left - transform.x) / transform.scale;
         const svgY = (e.clientY - rect.top - transform.y) / transform.scale;
-        const inchX = toInches(svgX) - DEFAULT_SIZE / 2;
-        const inchY = toInches(svgY) - DEFAULT_SIZE / 2;
+        const inchX = toInches(svgX) - DEFAULT_SHAPE_SIZE / 2;
+        const inchY = toInches(svgY) - DEFAULT_SHAPE_SIZE / 2;
 
         // Only place if the drop landed inside the SVG bounds
         if (
@@ -148,7 +147,7 @@ const styles: Record<string, React.CSSProperties> = {
     fontWeight: 600,
     textTransform: "uppercase",
     letterSpacing: "0.08em",
-    color: "#6c6f85",
+    color: THEME.overlay2,
     marginBottom: "4px",
   },
   grid: {
@@ -163,8 +162,8 @@ const styles: Record<string, React.CSSProperties> = {
     gap: "4px",
     padding: "8px 4px",
     borderRadius: "6px",
-    background: "#181825",
-    border: "1px solid #313244",
+    background: THEME.mantle,
+    border: `1px solid ${THEME.surface0}`,
     cursor: "grab",
     transition: "border-color 0.1s, background 0.1s",
   },
@@ -175,7 +174,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   tileLabel: {
     fontSize: "10px",
-    color: "#a6adc8",
+    color: THEME.subtext0,
   },
   ghost: {
     position: "fixed",

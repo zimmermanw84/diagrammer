@@ -82,6 +82,21 @@ describe("useHealthCheck", () => {
     expect(fetch).toHaveBeenCalledTimes(2);
   });
 
+  it("falls back gracefully when AbortSignal.timeout is not supported", async () => {
+    const origTimeout = AbortSignal.timeout;
+    // @ts-expect-error — simulating an environment that lacks AbortSignal.timeout
+    AbortSignal.timeout = undefined;
+
+    // fetch won't even be reached since AbortSignal.timeout() throws synchronously,
+    // but the try/catch in the hook catches it and sets isOnline to false
+    const { result } = renderHook(() => useHealthCheck());
+    await act(async () => { await Promise.resolve(); });
+
+    expect(result.current.isOnline).toBe(false);
+
+    AbortSignal.timeout = origTimeout;
+  });
+
   it("stops polling after unmount", async () => {
     mockHealthOk();
     const { unmount } = renderHook(() => useHealthCheck());

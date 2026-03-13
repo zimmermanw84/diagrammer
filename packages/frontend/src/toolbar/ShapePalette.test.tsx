@@ -141,6 +141,22 @@ describe("ShapePalette", () => {
     expect(y).toBeCloseTo(0.5);
   });
 
+  it("calls onAddShape with negative coordinates when dropped near the canvas origin", () => {
+    const onAddShape = vi.fn();
+    const svgRef = makeSvgRef({ left: 200, top: 100, right: 1000, bottom: 700 });
+    render(<ShapePalette svgRef={svgRef} transform={defaultTransform} onAddShape={onAddShape} />);
+
+    fireEvent.mouseDown(screen.getByTitle("Rectangle"), { clientX: 50, clientY: 50 });
+    // Drop just inside the top-left corner: svgX = 204-200 = 4px, svgY = 104-100 = 4px
+    // toInches(4) ≈ 0.042" → x = 0.042 - 0.5 ≈ -0.458 (negative, no clamping applied)
+    fireEvent.mouseUp(window, { clientX: 204, clientY: 104 });
+
+    expect(onAddShape).toHaveBeenCalledOnce();
+    const [, x, y] = onAddShape.mock.calls[0] as [ShapeType, number, number];
+    expect(x).toBeLessThan(0);
+    expect(y).toBeLessThan(0);
+  });
+
   it("accounts for canvas transform (zoom + pan) when computing drop position", () => {
     const onAddShape = vi.fn();
     const svgRef = makeSvgRef({ left: 200, top: 100, right: 1000, bottom: 700 });

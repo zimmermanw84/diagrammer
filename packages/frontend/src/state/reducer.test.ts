@@ -381,3 +381,19 @@ describe("Operations on wrong page are no-ops", () => {
     expect(next.document.pages[0].shapes[0].label).toBe("Test");
   });
 });
+
+describe("RESET", () => {
+  it("returns to a fresh empty document, discarding all shapes and connectors", () => {
+    let state = createInitialState();
+    state = dispatch(state, { type: "ADD_SHAPE", payload: makeShapePayload() });
+    state = dispatch(state, { type: "ADD_SHAPE", payload: makeShapePayload() });
+    expect(state.document.pages[0].shapes).toHaveLength(2);
+
+    state = dispatch(state, { type: "RESET" });
+
+    expect(state.document.pages).toHaveLength(1);
+    expect(state.document.pages[0].shapes).toHaveLength(0);
+    expect(state.document.pages[0].connectors).toHaveLength(0);
+    expect(state.selection).toBeNull();
+  });
+});

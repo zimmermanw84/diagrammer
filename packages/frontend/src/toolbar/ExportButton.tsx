@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { DiagramDocument } from "@diagrammer/shared";
 import { API_BASE } from "../config.js";
+import { THEME } from "../theme.js";
 
 interface ExportButtonProps {
   doc: DiagramDocument;
@@ -22,8 +23,9 @@ export function ExportButton({ doc, disabled }: ExportButtonProps) {
       });
 
       if (!res.ok) {
-        const data = await res.json().catch(() => ({})) as { error?: string };
-        throw new Error(data.error ?? `Export failed (${res.status})`);
+        const data = await res.json().catch(() => ({}));
+        const msg = typeof data.error === "string" ? data.error : `Export failed (${res.status})`;
+        throw new Error(msg);
       }
 
       const blob = await res.blob();
@@ -72,24 +74,24 @@ const styles: Record<string, React.CSSProperties> = {
     width: "100%",
     padding: "8px 12px",
     borderRadius: "6px",
-    border: "1px solid #89b4fa",
-    background: "#1e1e2e",
-    color: "#89b4fa",
+    border: `1px solid ${THEME.blue}`,
+    background: THEME.base,
+    color: THEME.blue,
     fontSize: "12px",
     fontWeight: 600,
     cursor: "pointer",
     transition: "background 0.1s",
   },
   buttonDisabled: {
-    border: "1px solid #45475a",
-    color: "#45475a",
+    border: `1px solid ${THEME.surface1}`,
+    color: THEME.surface1,
     cursor: "not-allowed",
   },
   toast: {
     padding: "6px 8px",
     borderRadius: "4px",
-    background: "#f38ba8",
-    color: "#1e1e2e",
+    background: THEME.red,
+    color: THEME.base,
     fontSize: "11px",
     cursor: "pointer",
     lineHeight: 1.4,
