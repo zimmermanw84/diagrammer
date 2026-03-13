@@ -1,12 +1,16 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import { diagramReducer, createInitialState } from "./reducer.js";
-import type { State } from "./reducer.js";
+import { diagramReducer, createInitialState, historyReducer, createInitialHistoryState } from "./reducer.js";
+import type { State, HistoryState } from "./reducer.js";
 import type { DiagramAction } from "./actions.js";
 import { DEFAULT_SHAPE_STYLE } from "@diagrammer/shared";
 import { makeShapePayload, makeConnectorPayload } from "../test-utils/fixtures.js";
 
 function dispatch(state: State, action: DiagramAction): State {
   return diagramReducer(state, action);
+}
+
+function hdispatch(state: HistoryState, action: DiagramAction): HistoryState {
+  return historyReducer(state, action);
 }
 
 describe("createInitialState", () => {
@@ -395,5 +399,114 @@ describe("RESET", () => {
     expect(state.document.pages[0].shapes).toHaveLength(0);
     expect(state.document.pages[0].connectors).toHaveLength(0);
     expect(state.selection).toBeNull();
+  });
+});
+
+describe("historyReducer — UNDO / REDO", () => {
+  it("starts with empty past and future", () => {
+    const state = createInitialHistoryState();
+    expect(state.past).toHaveLength(0);
+    expect(state.future).toHaveLength(0);
+  });
+
+  it("pushing a document action adds to past and clears future", () => {
+    let state = createInitialHistoryState();
+    state = hdispatch(state, { type: "ADD_SHAPE", payload: makeShapePayload() });
+    expect(state.past).toHaveLength(1);
+    expect(state.future).toHaveLength(0);
+    expect(state.document.pages[0].shapes).toHaveLength(1);
+  });
+
+  it("UNDO restores the previous document and moves current to future", () => {
+    let state = createInitialHistoryState();
+    state = hdispatch(state, { type: "ADD_SHAPE", payload: makeShapePayload() });
+    expect(state.document.pages[0].shapes).toHaveLength(1);
+
+    state = hdispatch(state, { type: "UNDO" });
+    expect(state.document.pages[0].shapes).toHaveLength(0);
+    expect(state.past).toHaveLength(0);
+    expect(state.future).toHaveLength(1);
+  });
+
+  it("REDO reapplies the undone document and moves it back to past", () => {
+    let state = createInitialHistoryState();
+    state = hdispatch(state, { type: "ADD_SHAPE", payload: makeShapePayload() });
+    state = hdispatch(state, { type: "UNDO" });
+    expect(state.document.pages[0].shapes).toHaveLength(0);
+
+    state = hdispatch(state, { type: "REDO" });
+    expect(state.document.pages[0].shapes).toHaveLength(1);
+    expect(state.past).toHaveLength(1);
+    expect(state.future).toHaveLength(0);
+  });
+
+  it("new action after UNDO clears future", () => {
+    let state = createInitialHistoryState();
+    state = hdispatch(state, { type: "ADD_SHAPE", payload: makeShapePayload() });
+    state = hdispatch(state, { type: "UNDO" });
+    expect(state.future).toHaveLength(1);
+
+    // New action should clear future
+    state = hdispatch(state, { type: "ADD_SHAPE", payload: makeShapePayload({ x: 5 }) });
+    expect(state.future).toHaveLength(0);
+  });
+
+  it("UNDO is a no-op when past is empty", () => {
+    const state = createInitialHistoryState();
+    const next = hdispatch(state, { type: "UNDO" });
+    expect(next).toBe(state);
+  });
+
+  it("REDO is a no-op when future is empty", () => {
+    const state = createInitialHistoryState();
+    const next = hdispatch(state, { type: "REDO" });
+    expect(next).toBe(state);
+  });
+
+  it("SELECT does not push to history", () => {
+    let state = createInitialHistoryState();
+    state = hdispatch(state, { type: "ADD_SHAPE", payload: makeShapePayload() });
+    const shapeId = state.document.pages[0].shapes[0].id;
+    const pastLengthBefore = state.past.length;
+
+    state = hdispatch(state, { type: "SELECT", payload: { id: shapeId } });
+    expect(state.past).toHaveLength(pastLengthBefore);
+    expect(state.selection).toBe(shapeId);
+  });
+
+  it("RESET clears past and future", () => {
+    let state = createInitialHistoryState();
+    state = hdispatch(state, { type: "ADD_SHAPE", payload: makeShapePayload() });
+    state = hdispatch(state, { type: "ADD_SHAPE", payload: makeShapePayload() });
+    expect(state.past.length).toBeGreaterThan(0);
+
+    state = hdispatch(state, { type: "RESET" });
+    expect(state.past).toHaveLength(0);
+    expect(state.future).toHaveLength(0);
+    expect(state.document.pages[0].shapes).toHaveLength(0);
+  });
+
+  it("caps history at 50 entries", () => {
+    let state = createInitialHistoryState();
+    for (let i = 0; i < 55; i++) {
+      state = hdispatch(state, { type: "ADD_SHAPE", payload: makeShapePayload({ x: i }) });
+    }
+    expect(state.past.length).toBe(50);
+  });
+
+  it("multiple undos traverse the full history chain", () => {
+    let state = createInitialHistoryState();
+    state = hdispatch(state, { type: "ADD_SHAPE", payload: makeShapePayload() });
+    state = hdispatch(state, { type: "ADD_SHAPE", payload: makeShapePayload() });
+    state = hdispatch(state, { type: "ADD_SHAPE", payload: makeShapePayload() });
+    expect(state.document.pages[0].shapes).toHaveLength(3);
+
+    state = hdispatch(state, { type: "UNDO" });
+    expect(state.document.pages[0].shapes).toHaveLength(2);
+    state = hdispatch(state, { type: "UNDO" });
+    expect(state.document.pages[0].shapes).toHaveLength(1);
+    state = hdispatch(state, { type: "UNDO" });
+    expect(state.document.pages[0].shapes).toHaveLength(0);
+    expect(state.future).toHaveLength(3);
   });
 });
