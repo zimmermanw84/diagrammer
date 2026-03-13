@@ -232,6 +232,36 @@ export function diagramReducer(state: State, action: DiagramAction): State {
       };
     }
 
+    case "RENAME_PAGE": {
+      const { pageId, name } = action.payload;
+      return {
+        ...state,
+        document: {
+          ...state.document,
+          pages: state.document.pages.map((p) =>
+            p.id === pageId ? { ...p, name } : p
+          ),
+        },
+      };
+    }
+
+    case "DELETE_PAGE": {
+      const { pageId } = action.payload;
+      if (state.document.pages.length <= 1) return state;
+      const pages = state.document.pages.filter((p) => p.id !== pageId);
+      let activePageId = state.activePageId;
+      if (activePageId === pageId) {
+        const idx = state.document.pages.findIndex((p) => p.id === pageId);
+        activePageId = (pages[idx] ?? pages[idx - 1])!.id;
+      }
+      return {
+        ...state,
+        activePageId,
+        selection: null,
+        document: { ...state.document, pages },
+      };
+    }
+
     case "SELECT": {
       return { ...state, selection: action.payload.id };
     }

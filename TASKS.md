@@ -296,10 +296,10 @@ These are independent of each other and can be picked up in any order after Phas
 ### T18 · Multi-Page UI
 **Depends on:** T05
 
-- [ ] Add page tab bar at the bottom of the canvas
-- [ ] Active page stored in UI state (not in `DiagramDocument`)
-- [ ] "+" tab creates a new page (dispatches `ADD_PAGE`)
-- [ ] Right-click on tab → rename / delete options
+- [x] Add page tab bar at the bottom of the canvas
+- [x] Active page stored in UI state (not in `DiagramDocument`)
+- [x] "+" tab creates a new page (dispatches `ADD_PAGE`)
+- [x] Right-click on tab → rename / delete options
 
 ---
 

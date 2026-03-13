@@ -402,6 +402,56 @@ describe("RESET", () => {
   });
 });
 
+describe("RENAME_PAGE", () => {
+  it("updates the page name", () => {
+    let state = createInitialState();
+    const pageId = state.document.pages[0].id;
+    state = dispatch(state, { type: "RENAME_PAGE", payload: { pageId, name: "My Page" } });
+    expect(state.document.pages[0].name).toBe("My Page");
+  });
+
+  it("is a no-op for an unknown pageId", () => {
+    const state = createInitialState();
+    const next = dispatch(state, { type: "RENAME_PAGE", payload: { pageId: "unknown", name: "X" } });
+    expect(next.document.pages[0].name).toBe(state.document.pages[0].name);
+  });
+});
+
+describe("DELETE_PAGE", () => {
+  it("removes the specified page", () => {
+    let state = createInitialState();
+    state = dispatch(state, { type: "ADD_PAGE", payload: { name: "Page 2", width: 11, height: 8.5 } });
+    const page2Id = state.document.pages[1].id;
+    state = dispatch(state, { type: "DELETE_PAGE", payload: { pageId: page2Id } });
+    expect(state.document.pages).toHaveLength(1);
+  });
+
+  it("is a no-op when only one page exists", () => {
+    const state = createInitialState();
+    const pageId = state.document.pages[0].id;
+    const next = dispatch(state, { type: "DELETE_PAGE", payload: { pageId } });
+    expect(next.document.pages).toHaveLength(1);
+  });
+
+  it("switches activePageId to adjacent page when active page is deleted", () => {
+    let state = createInitialState();
+    state = dispatch(state, { type: "ADD_PAGE", payload: { name: "Page 2", width: 11, height: 8.5 } });
+    const page2Id = state.document.pages[1].id;
+    state = dispatch(state, { type: "SET_ACTIVE_PAGE", payload: { pageId: page2Id } });
+    state = dispatch(state, { type: "DELETE_PAGE", payload: { pageId: page2Id } });
+    expect(state.activePageId).toBe(state.document.pages[0].id);
+  });
+
+  it("clears selection when deleting a page", () => {
+    let state = createInitialState();
+    state = dispatch(state, { type: "ADD_PAGE", payload: { name: "Page 2", width: 11, height: 8.5 } });
+    state = { ...state, selection: "some-shape" };
+    const page2Id = state.document.pages[1].id;
+    state = dispatch(state, { type: "DELETE_PAGE", payload: { pageId: page2Id } });
+    expect(state.selection).toBeNull();
+  });
+});
+
 describe("historyReducer — UNDO / REDO", () => {
   it("starts with empty past and future", () => {
     const state = createInitialHistoryState();
