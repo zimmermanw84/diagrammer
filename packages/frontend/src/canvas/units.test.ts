@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { PPI, toPixels, toInches } from "./units";
+import { PPI, toPixels, toInches, clientToSvgCoords } from "./units";
 
 describe("units", () => {
   it("PPI is 96", () => {
@@ -37,6 +37,42 @@ describe("units", () => {
     it("converts fractional pixels", () => {
       expect(toInches(48)).toBe(0.5);
       expect(toInches(24)).toBe(0.25);
+    });
+  });
+
+  describe("clientToSvgCoords", () => {
+    const rect = { left: 200, top: 100 };
+    const identity = { x: 0, y: 0, scale: 1 };
+
+    it("converts client coords to SVG coords with identity transform", () => {
+      const { x, y } = clientToSvgCoords(300, 200, rect, identity);
+      expect(x).toBeCloseTo(100);
+      expect(y).toBeCloseTo(100);
+    });
+
+    it("accounts for pan offset", () => {
+      const { x, y } = clientToSvgCoords(300, 200, rect, { x: 50, y: -30, scale: 1 });
+      expect(x).toBeCloseTo(50);  // (300 - 200 - 50) / 1
+      expect(y).toBeCloseTo(130); // (200 - 100 - (-30)) / 1
+    });
+
+    it("accounts for zoom scale", () => {
+      const { x, y } = clientToSvgCoords(300, 200, rect, { x: 0, y: 0, scale: 2 });
+      expect(x).toBeCloseTo(50);  // (300 - 200) / 2
+      expect(y).toBeCloseTo(50);  // (200 - 100) / 2
+    });
+
+    it("accounts for both pan and zoom", () => {
+      const { x, y } = clientToSvgCoords(400, 300, rect, { x: 100, y: 50, scale: 2 });
+      expect(x).toBeCloseTo(50);  // (400 - 200 - 100) / 2
+      expect(y).toBeCloseTo(75);  // (300 - 100 - 50) / 2
+    });
+
+    it("returns 0,0 when client point equals the transformed SVG origin", () => {
+      // origin at client (200+50, 100+50) = (250, 150) with pan (50,50) scale 1
+      const { x, y } = clientToSvgCoords(250, 150, rect, { x: 50, y: 50, scale: 1 });
+      expect(x).toBeCloseTo(0);
+      expect(y).toBeCloseTo(0);
     });
   });
 

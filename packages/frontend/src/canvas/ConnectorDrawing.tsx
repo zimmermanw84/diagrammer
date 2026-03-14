@@ -1,7 +1,7 @@
 import { useRef, useEffect } from "react";
 import type { DiagramShape } from "@diagrammer/shared";
 import { DEFAULT_CONNECTOR_STYLE } from "@diagrammer/shared";
-import { toPixels, toInches } from "./units.js";
+import { toPixels, toInches, clientToSvgCoords } from "./units.js";
 import type { ConnectionPoint } from "./shapes/ConnectionHandles.js";
 
 interface InProgress {
@@ -41,9 +41,7 @@ export function ConnectorDrawing({ shapes, svgRef, transform, onConnect, inProgr
       const svg = svgRef.current;
       if (!svg) return;
       const t = transformRef.current;
-      const rect = svg.getBoundingClientRect();
-      const svgX = (e.clientX - rect.left - t.x) / t.scale;
-      const svgY = (e.clientY - rect.top - t.y) / t.scale;
+      const { x: svgX, y: svgY } = clientToSvgCoords(e.clientX, e.clientY, svg.getBoundingClientRect(), t);
       setInProgressRef.current({ ...inProgressRef.current, toPoint: { x: svgX, y: svgY } });
     };
 
@@ -53,9 +51,7 @@ export function ConnectorDrawing({ shapes, svgRef, transform, onConnect, inProgr
       const svg = svgRef.current;
       if (!svg) return;
       const t = transformRef.current;
-      const rect = svg.getBoundingClientRect();
-      const svgX = (e.clientX - rect.left - t.x) / t.scale;
-      const svgY = (e.clientY - rect.top - t.y) / t.scale;
+      const { x: svgX, y: svgY } = clientToSvgCoords(e.clientX, e.clientY, svg.getBoundingClientRect(), t);
       const inchX = toInches(svgX);
       const inchY = toInches(svgY);
 

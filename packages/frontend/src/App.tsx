@@ -10,7 +10,7 @@ import { useKeyboardShortcuts } from "./canvas/useKeyboardShortcuts.js";
 import { PropertiesPanel } from "./properties/PropertiesPanel.js";
 import { DEFAULT_SHAPE_STYLE } from "@diagrammer/shared";
 import type { ShapeType } from "@diagrammer/shared";
-import { toInches } from "./canvas/units.js";
+import { toInches, clientToSvgCoords } from "./canvas/units.js";
 import { ShapePalette } from "./toolbar/ShapePalette.js";
 import { PageTabBar } from "./canvas/PageTabBar.js";
 import { ConnectorDefaults } from "./toolbar/ConnectorDefaults.js";
@@ -72,11 +72,7 @@ function DiagramEditor() {
     const file = Array.from(e.dataTransfer.files).find((f) => f.type.startsWith("image/"));
     if (!file || !svgRef.current) return;
 
-    const svgRect = svgRef.current.getBoundingClientRect();
-    const clientX = e.clientX - svgRect.left;
-    const clientY = e.clientY - svgRect.top;
-    const svgX = (clientX - transform.x) / transform.scale;
-    const svgY = (clientY - transform.y) / transform.scale;
+    const { x: svgX, y: svgY } = clientToSvgCoords(e.clientX, e.clientY, svgRef.current.getBoundingClientRect(), transform);
     const imageW = DEFAULT_SHAPE_WIDTH * 2;
     const imageH = DEFAULT_SHAPE_HEIGHT * 2;
     const x = toInches(svgX) - imageW / 2;
