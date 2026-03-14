@@ -15,6 +15,7 @@ import { ShapePalette } from "./toolbar/ShapePalette.js";
 import { PageTabBar } from "./canvas/PageTabBar.js";
 import { ConnectorDefaults } from "./toolbar/ConnectorDefaults.js";
 import { ExportButton } from "./toolbar/ExportButton.js";
+import { ImportButton } from "./toolbar/ImportButton.js";
 import { OfflineBanner } from "./toolbar/OfflineBanner.js";
 import { useHealthCheck } from "./toolbar/useHealthCheck.js";
 import { DEFAULT_SHAPE_WIDTH, DEFAULT_SHAPE_HEIGHT } from "./canvas/canvasConstants.js";
@@ -177,6 +178,7 @@ function DiagramEditor() {
                 Redo
               </button>
             </div>
+            <ImportButton disabled={!isOnline} />
             <ExportButton doc={state.document} disabled={!isOnline} />
             <button
               style={styles.newButton}
