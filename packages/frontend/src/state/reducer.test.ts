@@ -472,6 +472,44 @@ describe("DELETE_PAGE", () => {
     state = dispatch(state, { type: "DELETE_PAGE", payload: { pageId: page2Id } });
     expect(state.selection).toEqual([]);
   });
+
+  it("falls back to the previous page when the last page is deleted (B1 regression)", () => {
+    // [p0, p1, p2(active)] → delete p2 → active should be p1
+    let state = createInitialState();
+    state = dispatch(state, { type: "ADD_PAGE", payload: { name: "Page 2", width: 11, height: 8.5 } });
+    state = dispatch(state, { type: "ADD_PAGE", payload: { name: "Page 3", width: 11, height: 8.5 } });
+    const page3Id = state.document.pages[2].id;
+    const page2Id = state.document.pages[1].id;
+    state = dispatch(state, { type: "SET_ACTIVE_PAGE", payload: { pageId: page3Id } });
+    state = dispatch(state, { type: "DELETE_PAGE", payload: { pageId: page3Id } });
+    expect(state.document.pages).toHaveLength(2);
+    expect(state.activePageId).toBe(page2Id);
+  });
+
+  it("switches to the next page when a middle page is deleted (B1 regression)", () => {
+    // [p0, p1(active), p2] → delete p1 → active should be p2
+    let state = createInitialState();
+    state = dispatch(state, { type: "ADD_PAGE", payload: { name: "Page 2", width: 11, height: 8.5 } });
+    state = dispatch(state, { type: "ADD_PAGE", payload: { name: "Page 3", width: 11, height: 8.5 } });
+    const page2Id = state.document.pages[1].id;
+    const page3Id = state.document.pages[2].id;
+    state = dispatch(state, { type: "SET_ACTIVE_PAGE", payload: { pageId: page2Id } });
+    state = dispatch(state, { type: "DELETE_PAGE", payload: { pageId: page2Id } });
+    expect(state.document.pages).toHaveLength(2);
+    expect(state.activePageId).toBe(page3Id);
+  });
+
+  it("switches to the first page when the first active page is deleted (B1 regression)", () => {
+    // [p0(active), p1] → delete p0 → active should be p1 (now index 0)
+    let state = createInitialState();
+    state = dispatch(state, { type: "ADD_PAGE", payload: { name: "Page 2", width: 11, height: 8.5 } });
+    const page1Id = state.document.pages[0].id;
+    const page2Id = state.document.pages[1].id;
+    expect(state.activePageId).toBe(page1Id);
+    state = dispatch(state, { type: "DELETE_PAGE", payload: { pageId: page1Id } });
+    expect(state.document.pages).toHaveLength(1);
+    expect(state.activePageId).toBe(page2Id);
+  });
 });
 
 describe("historyReducer — UNDO / REDO", () => {

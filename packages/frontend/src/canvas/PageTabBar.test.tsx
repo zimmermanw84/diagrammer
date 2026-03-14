@@ -181,4 +181,47 @@ describe("PageTabBar", () => {
 
     expect(onRename).not.toHaveBeenCalled();
   });
+
+  it("clamps context menu x position to stay within viewport width (B6 regression)", () => {
+    // Simulate a narrow viewport where the click would push the menu off-screen
+    Object.defineProperty(window, "innerWidth", { value: 150, configurable: true });
+    render(
+      <PageTabBar
+        pages={pages}
+        activePageId="p1"
+        onSelect={vi.fn()}
+        onAdd={vi.fn()}
+        onRename={vi.fn()}
+        onDelete={vi.fn()}
+      />
+    );
+    // Right-click near the right edge — raw x=140 would overflow a 120px-wide menu
+    fireEvent.contextMenu(screen.getByText("Page 1"), { clientX: 140, clientY: 50 });
+    const menu = document.querySelector("[style*='position: fixed']") as HTMLElement;
+    expect(menu).toBeTruthy();
+    const left = parseFloat(menu.style.left);
+    expect(left).toBeLessThanOrEqual(window.innerWidth - 100); // menu must not overflow
+    Object.defineProperty(window, "innerWidth", { value: 1024, configurable: true });
+  });
+
+  it("clamps context menu y position to stay within viewport height (B6 regression)", () => {
+    // Simulate clicking near the bottom edge — raw y would push menu off-screen
+    Object.defineProperty(window, "innerHeight", { value: 200, configurable: true });
+    render(
+      <PageTabBar
+        pages={pages}
+        activePageId="p1"
+        onSelect={vi.fn()}
+        onAdd={vi.fn()}
+        onRename={vi.fn()}
+        onDelete={vi.fn()}
+      />
+    );
+    fireEvent.contextMenu(screen.getByText("Page 1"), { clientX: 50, clientY: 190 });
+    const menu = document.querySelector("[style*='position: fixed']") as HTMLElement;
+    expect(menu).toBeTruthy();
+    const top = parseFloat(menu.style.top);
+    expect(top).toBeLessThanOrEqual(window.innerHeight - 50); // menu must not overflow
+    Object.defineProperty(window, "innerHeight", { value: 768, configurable: true });
+  });
 });

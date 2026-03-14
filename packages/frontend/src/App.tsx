@@ -17,7 +17,7 @@ import { ConnectorDefaults } from "./toolbar/ConnectorDefaults.js";
 import { ExportButton } from "./toolbar/ExportButton.js";
 import { OfflineBanner } from "./toolbar/OfflineBanner.js";
 import { useHealthCheck } from "./toolbar/useHealthCheck.js";
-import { DEFAULT_SHAPE_SIZE } from "./canvas/canvasConstants.js";
+import { DEFAULT_SHAPE_WIDTH, DEFAULT_SHAPE_HEIGHT } from "./canvas/canvasConstants.js";
 import { THEME } from "./theme.js";
 import type { InProgress } from "./canvas/ConnectorDrawing.js";
 import type { ConnectionPoint } from "./canvas/shapes/ConnectionHandles.js";
@@ -77,8 +77,10 @@ function DiagramEditor() {
     const clientY = e.clientY - svgRect.top;
     const svgX = (clientX - transform.x) / transform.scale;
     const svgY = (clientY - transform.y) / transform.scale;
-    const x = toInches(svgX) - DEFAULT_SHAPE_SIZE / 2;
-    const y = toInches(svgY) - DEFAULT_SHAPE_SIZE / 2;
+    const imageW = DEFAULT_SHAPE_WIDTH * 2;
+    const imageH = DEFAULT_SHAPE_HEIGHT * 2;
+    const x = toInches(svgX) - imageW / 2;
+    const y = toInches(svgY) - imageH / 2;
 
     const reader = new FileReader();
     reader.onload = () => {
@@ -88,8 +90,8 @@ function DiagramEditor() {
           type: "image",
           x,
           y,
-          width: DEFAULT_SHAPE_SIZE * 2,
-          height: DEFAULT_SHAPE_SIZE * 2,
+          width: imageW,
+          height: imageH,
           label: "",
           style: { ...DEFAULT_SHAPE_STYLE, fillColor: "transparent", strokeColor: "#ccc" },
           properties: {},
@@ -136,8 +138,8 @@ function DiagramEditor() {
                   type,
                   x,
                   y,
-                  width: DEFAULT_SHAPE_SIZE,
-                  height: DEFAULT_SHAPE_SIZE,
+                  width: DEFAULT_SHAPE_WIDTH,
+                  height: DEFAULT_SHAPE_HEIGHT,
                   label: "",
                   style: { ...DEFAULT_SHAPE_STYLE },
                   properties: {},

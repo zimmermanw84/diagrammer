@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { ShapePalette, LIBRARIES } from "./ShapePalette.js";
+import { DEFAULT_SHAPE_WIDTH, DEFAULT_SHAPE_HEIGHT } from "../canvas/canvasConstants.js";
 import type { ShapeType } from "@diagrammer/shared";
 import { createRef } from "react";
 
@@ -29,6 +30,26 @@ function renderPalette(onAddShape = vi.fn(), transform = defaultTransform) {
   render(<ShapePalette svgRef={svgRef} transform={transform} onAddShape={onAddShape} />);
   return { svgRef, onAddShape };
 }
+
+describe("default shape dimensions (B7 regression)", () => {
+  it("DEFAULT_SHAPE_WIDTH is wider than DEFAULT_SHAPE_HEIGHT — shapes are rectangles not squares", () => {
+    expect(DEFAULT_SHAPE_WIDTH).toBeGreaterThan(DEFAULT_SHAPE_HEIGHT);
+  });
+
+  it("drop placement uses different offsets for x and y — not a square centering", () => {
+    const onAddShape = vi.fn();
+    const svgRef = makeSvgRef({ left: 0, top: 0, right: 1000, bottom: 700 });
+    render(<ShapePalette svgRef={svgRef} transform={defaultTransform} onAddShape={onAddShape} />);
+
+    // Drop at exactly (96px, 96px) in svg space = (1in, 1in)
+    fireEvent.mouseDown(screen.getByTitle("Rectangle"), { clientX: 50, clientY: 50 });
+    fireEvent.mouseUp(window, { clientX: 96, clientY: 96 });
+
+    const [, x, y] = onAddShape.mock.calls[0] as [ShapeType, number, number];
+    // x offset = 1in - DEFAULT_SHAPE_WIDTH/2, y offset = 1in - DEFAULT_SHAPE_HEIGHT/2
+    expect(x).not.toBeCloseTo(y); // width ≠ height means centering offsets differ
+  });
+});
 
 describe("ShapePalette — libraries", () => {
   it("renders a collapsible header for each library", () => {
@@ -152,6 +173,9 @@ describe("ShapePalette — drag and drop", () => {
   });
 
   it("places the shape centered on the drop point", () => {
+    // Drop at clientX=296, clientY=196 → svgX=96px, svgY=96px
+    // inchX = 96/96 - DEFAULT_SHAPE_WIDTH/2 = 1 - 0.75 = 0.25
+    // inchY = 96/96 - DEFAULT_SHAPE_HEIGHT/2 = 1 - 0.5 = 0.5
     const onAddShape = vi.fn();
     const svgRef = makeSvgRef({ left: 200, top: 100, right: 1000, bottom: 700 });
     render(<ShapePalette svgRef={svgRef} transform={defaultTransform} onAddShape={onAddShape} />);
@@ -161,7 +185,7 @@ describe("ShapePalette — drag and drop", () => {
 
     expect(onAddShape).toHaveBeenCalledOnce();
     const [, x, y] = onAddShape.mock.calls[0] as [ShapeType, number, number];
-    expect(x).toBeCloseTo(0.5);
+    expect(x).toBeCloseTo(0.25);
     expect(y).toBeCloseTo(0.5);
   });
 
@@ -180,6 +204,10 @@ describe("ShapePalette — drag and drop", () => {
   });
 
   it("accounts for canvas transform (zoom + pan) when computing drop position", () => {
+    // Drop at clientX=296, clientY=196 with scale=2, panX=48
+    // svgX = (296-200-48)/2 = 24px, svgY = (196-100-0)/2 = 48px
+    // inchX = 24/96 - DEFAULT_SHAPE_WIDTH/2 = 0.25 - 0.75 = -0.5
+    // inchY = 48/96 - DEFAULT_SHAPE_HEIGHT/2 = 0.5 - 0.5 = 0
     const onAddShape = vi.fn();
     const svgRef = makeSvgRef({ left: 200, top: 100, right: 1000, bottom: 700 });
     const transform = { scale: 2, x: 48, y: 0 };
@@ -190,7 +218,7 @@ describe("ShapePalette — drag and drop", () => {
 
     expect(onAddShape).toHaveBeenCalledOnce();
     const [, x, y] = onAddShape.mock.calls[0] as [ShapeType, number, number];
-    expect(x).toBeCloseTo(-0.25);
+    expect(x).toBeCloseTo(-0.5);
     expect(y).toBeCloseTo(0);
   });
 

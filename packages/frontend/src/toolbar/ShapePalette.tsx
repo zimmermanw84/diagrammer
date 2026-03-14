@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { ShapeType } from "@diagrammer/shared";
 import { toInches } from "../canvas/units.js";
-import { DEFAULT_SHAPE_SIZE } from "../canvas/canvasConstants.js";
+import { DEFAULT_SHAPE_WIDTH, DEFAULT_SHAPE_HEIGHT } from "../canvas/canvasConstants.js";
 import { THEME } from "../theme.js";
 
 // ---------------------------------------------------------------------------
@@ -122,8 +122,8 @@ export function ShapePalette({ svgRef, transform, onAddShape }: ShapePaletteProp
         const rect = svg.getBoundingClientRect();
         const svgX = (e.clientX - rect.left - transform.x) / transform.scale;
         const svgY = (e.clientY - rect.top - transform.y) / transform.scale;
-        const inchX = toInches(svgX) - DEFAULT_SHAPE_SIZE / 2;
-        const inchY = toInches(svgY) - DEFAULT_SHAPE_SIZE / 2;
+        const inchX = toInches(svgX) - DEFAULT_SHAPE_WIDTH / 2;
+        const inchY = toInches(svgY) - DEFAULT_SHAPE_HEIGHT / 2;
 
         if (
           e.clientX >= rect.left &&

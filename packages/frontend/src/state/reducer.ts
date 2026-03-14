@@ -284,8 +284,9 @@ export function diagramReducer(state: State, action: DiagramAction): State {
       const pages = state.document.pages.filter((p) => p.id !== pageId);
       let activePageId = state.activePageId;
       if (activePageId === pageId) {
-        const idx = state.document.pages.findIndex((p) => p.id === pageId);
-        activePageId = (pages[idx] ?? pages[idx - 1])!.id;
+        const deletedIndex = state.document.pages.findIndex((p) => p.id === pageId);
+        const fallbackIndex = Math.min(deletedIndex, pages.length - 1);
+        activePageId = pages[fallbackIndex]!.id;
       }
       return {
         ...state,
