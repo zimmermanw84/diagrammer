@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, fireEvent } from "@testing-library/react";
-import { ConnectorElement, shapeEdgePoint } from "./ConnectorElement.js";
+import { ConnectorElement } from "./ConnectorElement.js";
+import { shapeEdgePoint } from "../geometry.js";
 import { DEFAULT_CONNECTOR_STYLE } from "@diagrammer/shared";
 import type { RoutingAlgorithm, ArrowHeadType } from "@diagrammer/shared";
 import { makeShape, makeConnector } from "../../test-utils/fixtures.js";
