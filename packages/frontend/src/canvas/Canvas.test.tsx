@@ -228,6 +228,39 @@ describe("Canvas — deselect", () => {
     fireEvent.mouseUp(svg, { button: 0, clientX: 200, clientY: 200 });
     expect(onRubberBandSelect).toHaveBeenCalledOnce();
   });
+
+  it("passes rubber-band rect in inches, accounting for canvas transform", () => {
+    // Viewport 800×600, page 1056×816 → initial transform x=-128, y=-108, scale=1
+    // mousedown client(100,100) → svgX = 100-0-(-128) = 228, svgY = 208
+    // mouseup   client(200,200) → svgX = 328, svgY = 308
+    // rect in inches: x=228/96, y=208/96, w=100/96, h=100/96
+    const onRubberBandSelect = vi.fn();
+    const { container } = render(<Canvas page={PAGE} onRubberBandSelect={onRubberBandSelect} />);
+    const svg = container.querySelector("svg")!;
+    fireEvent.mouseDown(svg, { button: 0, clientX: 100, clientY: 100 });
+    fireEvent.mouseMove(svg, { clientX: 200, clientY: 200 });
+    fireEvent.mouseUp(svg, { button: 0, clientX: 200, clientY: 200 });
+
+    const rect = onRubberBandSelect.mock.calls[0]?.[0];
+    expect(rect.x).toBeCloseTo(228 / 96);
+    expect(rect.y).toBeCloseTo(208 / 96);
+    expect(rect.w).toBeCloseTo(100 / 96);
+    expect(rect.h).toBeCloseTo(100 / 96);
+  });
+
+  it("does not call onRubberBandSelect for a sub-threshold drag (≤4px)", () => {
+    const onRubberBandSelect = vi.fn();
+    const onDeselect = vi.fn();
+    const { container } = render(
+      <Canvas page={PAGE} onRubberBandSelect={onRubberBandSelect} onDeselect={onDeselect} />
+    );
+    const svg = container.querySelector("svg")!;
+    fireEvent.mouseDown(svg, { button: 0, clientX: 100, clientY: 100 });
+    fireEvent.mouseMove(svg, { clientX: 102, clientY: 100 }); // 2px — below threshold
+    fireEvent.mouseUp(svg, { button: 0, clientX: 102, clientY: 100 });
+    expect(onRubberBandSelect).not.toHaveBeenCalled();
+    expect(onDeselect).toHaveBeenCalledOnce(); // treated as a plain click
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -275,6 +308,29 @@ describe("Canvas — pan", () => {
     const after = getTransform(container);
     expect(after.x).toBeCloseTo(before.x);
     expect(after.y).toBeCloseTo(before.y);
+  });
+
+  it("space+left-drag pans the canvas", () => {
+    const { container } = render(<Canvas page={PAGE} />);
+    const svg = container.querySelector("svg")!;
+
+    const before = getTransform(container);
+
+    act(() => {
+      fireEvent.keyDown(document.body, { code: "Space" });
+      svg.dispatchEvent(
+        new MouseEvent("mousedown", { button: 0, clientX: 100, clientY: 100, bubbles: true })
+      );
+      svg.dispatchEvent(
+        new MouseEvent("mousemove", { clientX: 200, clientY: 150, bubbles: true })
+      );
+      svg.dispatchEvent(new MouseEvent("mouseup", { bubbles: true }));
+      fireEvent.keyUp(document.body, { code: "Space" });
+    });
+
+    const after = getTransform(container);
+    expect(after.x).toBeCloseTo(before.x + 100);
+    expect(after.y).toBeCloseTo(before.y + 50);
   });
 
   it("mouseleave ends an active drag — further moves do not translate", () => {
