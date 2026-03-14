@@ -1,6 +1,6 @@
 import { VisioDocument, ArrowHeads } from "ts-visio";
-import type { ShapeGeometry } from "ts-visio";
-import type { DiagramDocument, ShapeType, ArrowHeadType, StrokeDash } from "@diagrammer/shared";
+import type { ShapeGeometry, ConnectorRouting } from "ts-visio";
+import type { DiagramDocument, ShapeType, ArrowHeadType, StrokeDash, RoutingAlgorithm } from "@diagrammer/shared";
 
 // ---------------------------------------------------------------------------
 // Mapping tables
@@ -30,7 +30,7 @@ const ARROW_HEAD_MAP: Record<ArrowHeadType, string> = {
   one: ArrowHeads.One,
 };
 
-const ROUTING_MAP: Record<string, string> = {
+const ROUTING_MAP: Record<RoutingAlgorithm, ConnectorRouting> = {
   straight: "straight",
   curved: "curved",
   right_angle: "orthogonal",
@@ -134,7 +134,7 @@ export class DiagramMapper {
             lineColor: connector.style.strokeColor,
             lineWeight: connector.style.strokeWidth,
             linePattern: LINE_PATTERN_MAP[connector.style.strokeDash],
-            routing: (ROUTING_MAP[connector.routing] ?? "straight") as "straight" | "orthogonal" | "curved",
+            routing: ROUTING_MAP[connector.routing],
           },
         );
       }
