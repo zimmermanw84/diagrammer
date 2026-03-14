@@ -6,6 +6,26 @@ interface AlignmentToolbarProps {
   onAlign: (moves: { id: string; x: number; y: number }[]) => void;
 }
 
+function distributeAlongAxis(
+  shapes: DiagramShape[],
+  axis: "x" | "y",
+  size: "width" | "height"
+): { id: string; x: number; y: number }[] {
+  const sorted = [...shapes].sort((a, b) => a[axis] - b[axis]);
+  const totalSize = sorted.reduce((sum, s) => sum + s[size], 0);
+  const last = sorted[sorted.length - 1]!;
+  const span = last[axis] + last[size] - sorted[0]![axis];
+  const gap = (span - totalSize) / (sorted.length - 1);
+  let cursor = sorted[0]![axis];
+  return sorted.map((s) => {
+    const pos = cursor;
+    cursor += s[size] + gap;
+    return axis === "x"
+      ? { id: s.id, x: pos, y: s.y }
+      : { id: s.id, x: s.x, y: pos };
+  });
+}
+
 function computeMoves(
   shapes: DiagramShape[],
   op: "left" | "centerH" | "right" | "top" | "middleV" | "bottom" | "distributeH" | "distributeV"
@@ -37,30 +57,10 @@ function computeMoves(
       const maxBottom = Math.max(...shapes.map((s) => s.y + s.height));
       return shapes.map((s) => ({ id: s.id, x: s.x, y: maxBottom - s.height }));
     }
-    case "distributeH": {
-      const sorted = [...shapes].sort((a, b) => a.x - b.x);
-      const totalWidth = sorted.reduce((sum, s) => sum + s.width, 0);
-      const span = sorted[sorted.length - 1]!.x + sorted[sorted.length - 1]!.width - sorted[0]!.x;
-      const gap = (span - totalWidth) / (sorted.length - 1);
-      let cursor = sorted[0]!.x;
-      return sorted.map((s) => {
-        const x = cursor;
-        cursor += s.width + gap;
-        return { id: s.id, x, y: s.y };
-      });
-    }
-    case "distributeV": {
-      const sorted = [...shapes].sort((a, b) => a.y - b.y);
-      const totalHeight = sorted.reduce((sum, s) => sum + s.height, 0);
-      const span = sorted[sorted.length - 1]!.y + sorted[sorted.length - 1]!.height - sorted[0]!.y;
-      const gap = (span - totalHeight) / (sorted.length - 1);
-      let cursor = sorted[0]!.y;
-      return sorted.map((s) => {
-        const y = cursor;
-        cursor += s.height + gap;
-        return { id: s.id, x: s.x, y };
-      });
-    }
+    case "distributeH":
+      return distributeAlongAxis(shapes, "x", "width");
+    case "distributeV":
+      return distributeAlongAxis(shapes, "y", "height");
   }
 }
 
@@ -118,4 +118,4 @@ const btnStyle: React.CSSProperties = {
   fontSize: 14,
 };
 
-export { computeMoves };
+export { computeMoves, distributeAlongAxis };
