@@ -7,10 +7,6 @@ import { toSvgStyle } from "./shapeStyle.js";
 import { ConnectionHandles } from "./ConnectionHandles.js";
 import type { ConnectionPoint } from "./ConnectionHandles.js";
 
-interface ForeignObjectInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
-  xmlns?: string;
-}
-
 interface ShapeElementProps {
   shape: DiagramShape;
   isSelected: boolean;
@@ -82,8 +78,7 @@ export function ShapeElement({
   const labelX = textAlign === "left" ? 6 : textAlign === "right" ? w - 6 : w / 2;
   const labelY = h / 2;
 
-  const editInputProps: ForeignObjectInputProps = {
-    xmlns: "http://www.w3.org/1999/xhtml",
+  const editInputProps: React.InputHTMLAttributes<HTMLInputElement> = {
     autoFocus: true,
     value: draft,
     onChange: (e) => setDraft(e.target.value),
