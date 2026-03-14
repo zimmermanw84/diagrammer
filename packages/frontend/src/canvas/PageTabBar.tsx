@@ -49,9 +49,14 @@ export function PageTabBar({ pages, activePageId, onSelect, onAdd, onRename, onD
     setRenameValue(page.name);
   };
 
+  const MENU_WIDTH = 120;
+  const MENU_HEIGHT = 76; // two items at ~38px each
+
   const handleContextMenu = (e: React.MouseEvent, pageId: string) => {
     e.preventDefault();
-    setMenu({ pageId, x: e.clientX, y: e.clientY });
+    const x = Math.min(e.clientX, window.innerWidth - MENU_WIDTH);
+    const y = Math.min(e.clientY, window.innerHeight - MENU_HEIGHT);
+    setMenu({ pageId, x, y });
   };
 
   return (

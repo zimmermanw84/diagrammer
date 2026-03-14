@@ -4,4 +4,5 @@ export const DASH_ARRAYS: Record<string, string> = {
   dotted: "2 4",
 };
 
-export const DEFAULT_SHAPE_SIZE = 1; // inches
+export const DEFAULT_SHAPE_WIDTH = 1.5; // inches
+export const DEFAULT_SHAPE_HEIGHT = 1;  // inches
