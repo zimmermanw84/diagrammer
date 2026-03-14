@@ -7,23 +7,23 @@ export function useHealthCheck(): { isOnline: boolean } {
   const [isOnline, setIsOnline] = useState(true);
 
   useEffect(() => {
-    let cancelled = false;
+    const controller = new AbortController();
 
     const check = async () => {
       try {
         const res = await fetch(`${API_BASE}/api/v1/health`, {
           signal: AbortSignal.timeout(TIMEOUT_MS),
         });
-        if (!cancelled) setIsOnline(res.ok);
+        if (!controller.signal.aborted) setIsOnline(res.ok);
       } catch {
-        if (!cancelled) setIsOnline(false);
+        if (!controller.signal.aborted) setIsOnline(false);
       }
     };
 
     check();
     const id = setInterval(check, POLL_INTERVAL_MS);
     return () => {
-      cancelled = true;
+      controller.abort();
       clearInterval(id);
     };
   }, []);
