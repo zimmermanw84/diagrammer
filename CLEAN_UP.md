@@ -32,8 +32,8 @@
 | ID | Files | Issue | Status |
 |----|-------|-------|--------|
 | E1 | `canvas/connectors/ConnectorElement.tsx` | `rayPolygonEdge`, `shapeEdgePoint`, and `buildPath` all mixed into one 224-line file — extract to `canvas/geometry.ts` and `canvas/routing.ts` | [x] |
-| E2 | `canvas/shapes/ShapeElement.tsx`, `canvas/ConnectorDrawing.tsx` | Inline global `mousemove`/`mouseup` listener pattern repeated — extract to `useGlobalMouseDrag()` hook | [ ] |
-| E3 | `canvas/Canvas.tsx` | Pan/zoom + rubber-band selection in one 245-line component — extract `usePanZoom()` and `useRubberBandSelection()` hooks | [ ] |
+| E2 | `canvas/shapes/ShapeElement.tsx`, `canvas/ConnectorDrawing.tsx` | Inline global `mousemove`/`mouseup` listener pattern repeated — extract to `useGlobalMouseDrag()` hook | [x] |
+| E3 | `canvas/Canvas.tsx` | Pan/zoom + rubber-band selection in one 245-line component — extract `usePanZoom()` and `useRubberBandSelection()` hooks | [x] |
 
 ---
 
