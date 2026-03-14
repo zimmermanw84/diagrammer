@@ -5,13 +5,14 @@ interface GeometryProps {
   width: number;
   height: number;
   style: React.SVGAttributes<SVGElement>;
+  src?: string;
 }
 
 /**
  * Renders the raw SVG geometry for a shape type (no label, no interaction).
  * All dimensions are in pixels.
  */
-export function ShapeGeometry({ type, width: w, height: h, style }: GeometryProps) {
+export function ShapeGeometry({ type, width: w, height: h, style, src }: GeometryProps) {
   switch (type) {
     case "rectangle":
       return <rect x={0} y={0} width={w} height={h} {...style} />;
@@ -39,6 +40,13 @@ export function ShapeGeometry({ type, width: w, height: h, style }: GeometryProp
     }
 
     case "image":
-      return <rect x={0} y={0} width={w} height={h} {...style} />;
+      return src ? (
+        <>
+          <image href={src} x={0} y={0} width={w} height={h} preserveAspectRatio="xMidYMid meet" />
+          <rect x={0} y={0} width={w} height={h} fill="none" stroke={style.stroke} strokeWidth={style.strokeWidth} />
+        </>
+      ) : (
+        <rect x={0} y={0} width={w} height={h} {...style} />
+      );
   }
 }

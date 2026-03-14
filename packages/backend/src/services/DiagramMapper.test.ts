@@ -120,6 +120,48 @@ describe("DiagramMapper.toVsdx", () => {
     expect(buffer.length).toBeGreaterThan(0);
   });
 
+  it("handles image shape with src without throwing", async () => {
+    const doc: DiagramDocument = {
+      ...FIXTURE,
+      pages: [
+        {
+          ...FIXTURE.pages[0]!,
+          connectors: [],
+          shapes: [
+            {
+              id: "00000000-0000-0000-0000-000000000050",
+              type: "image",
+              x: 1,
+              y: 1,
+              width: 2,
+              height: 2,
+              label: "",
+              src: "data:image/png;base64,iVBORw0KGgo=",
+              style: {
+                fillColor: "transparent",
+                strokeColor: "#cccccc",
+                strokeWidth: 1,
+                fontFamily: "Arial",
+                fontSize: 12,
+                fontColor: "#000000",
+                bold: false,
+                italic: false,
+                textAlign: "center",
+                strokeDash: "solid",
+                shadow: false,
+              },
+              properties: {},
+            },
+          ],
+        },
+      ],
+    };
+
+    const buffer = await DiagramMapper.toVsdx(doc);
+    expect(buffer).toBeInstanceOf(Buffer);
+    expect(buffer.length).toBeGreaterThan(0);
+  });
+
   it("handles multiple shape types without throwing", async () => {
     const doc: DiagramDocument = {
       ...FIXTURE,

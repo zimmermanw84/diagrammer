@@ -63,6 +63,7 @@ export function ShapeElement({
   // ── inline label edit ───────────────────────────────────────────────────
   const onDoubleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
+    if (shape.type === "image") return;
     setDraft(shape.label);
     setEditing(true);
   };
@@ -91,7 +92,7 @@ export function ShapeElement({
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
-      <ShapeGeometry type={shape.type} width={w} height={h} style={svgStyle} />
+      <ShapeGeometry type={shape.type} width={w} height={h} style={svgStyle} src={shape.src} />
 
       <ConnectionHandles
         width={w}

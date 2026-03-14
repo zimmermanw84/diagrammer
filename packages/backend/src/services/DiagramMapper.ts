@@ -105,6 +105,11 @@ export class DiagramMapper {
           lineWeight: shape.style.strokeWidth,
         });
 
+        // Embed image src as a custom property for round-trip fidelity
+        if (shape.type === "image" && shape.src) {
+          visioShape.addData("imageSrc", { value: shape.src, label: "Image Source" });
+        }
+
         // Custom properties
         for (const [key, value] of Object.entries(shape.properties)) {
           visioShape.addData(key, { value, label: key });

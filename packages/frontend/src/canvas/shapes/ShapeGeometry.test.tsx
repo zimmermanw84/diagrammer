@@ -54,4 +54,32 @@ describe("ShapeGeometry", () => {
     );
     expect(container.querySelector("rect")?.getAttribute("rx")).toBe("8");
   });
+
+  it("image with src renders an <image> element", () => {
+    const src = "data:image/png;base64,abc123";
+    const { container } = renderInSvg(
+      <ShapeGeometry type="image" width={100} height={60} style={svgStyle} src={src} />
+    );
+    const img = container.querySelector("image");
+    expect(img).toBeTruthy();
+    expect(img?.getAttribute("href")).toBe(src);
+    expect(img?.getAttribute("width")).toBe("100");
+    expect(img?.getAttribute("height")).toBe("60");
+    expect(img?.getAttribute("preserveAspectRatio")).toBe("xMidYMid meet");
+  });
+
+  it("image with src also renders a border <rect>", () => {
+    const { container } = renderInSvg(
+      <ShapeGeometry type="image" width={100} height={60} style={svgStyle} src="data:image/png;base64,x" />
+    );
+    expect(container.querySelector("rect")).toBeTruthy();
+  });
+
+  it("image without src renders a plain <rect> (placeholder)", () => {
+    const { container } = renderInSvg(
+      <ShapeGeometry type="image" width={100} height={60} style={svgStyle} />
+    );
+    expect(container.querySelector("image")).toBeNull();
+    expect(container.querySelector("rect")).toBeTruthy();
+  });
 });
