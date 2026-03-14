@@ -1,24 +1,11 @@
-import type { ConnectorStyle, StrokeDash, ArrowHeadType } from "@diagrammer/shared";
+import type { ConnectorStyle } from "@diagrammer/shared";
 import { THEME } from "../theme.js";
+import { ARROW_OPTIONS, DASH_OPTIONS } from "../connectorOptions.js";
 
 interface ConnectorDefaultsProps {
   style: ConnectorStyle;
   onChange: (patch: Partial<ConnectorStyle>) => void;
 }
-
-const DASH_OPTIONS: { value: StrokeDash; label: string }[] = [
-  { value: "solid", label: "—" },
-  { value: "dashed", label: "╌" },
-  { value: "dotted", label: "·····" },
-];
-
-const ARROW_END_OPTIONS: { value: ArrowHeadType; label: string }[] = [
-  { value: "none", label: "None" },
-  { value: "open", label: "Open ›" },
-  { value: "filled", label: "Filled ▶" },
-  { value: "crowsfoot", label: "Crowsfoot" },
-  { value: "one", label: "One |" },
-];
 
 export function ConnectorDefaults({ style, onChange }: ConnectorDefaultsProps) {
   return (
@@ -53,7 +40,7 @@ export function ConnectorDefaults({ style, onChange }: ConnectorDefaultsProps) {
           style={styles.select}
           aria-label="Arrow end"
         >
-          {ARROW_END_OPTIONS.map(({ value, label }) => (
+          {ARROW_OPTIONS.map(({ value, label }) => (
             <option key={value} value={value}>{label}</option>
           ))}
         </select>

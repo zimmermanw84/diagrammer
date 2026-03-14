@@ -1,19 +1,12 @@
-import type { ConnectorStyle, ArrowHeadType } from "@diagrammer/shared";
+import type { ConnectorStyle } from "@diagrammer/shared";
 import { StrokeDashSchema, ArrowHeadTypeSchema } from "@diagrammer/shared";
 import { panelInputStyle, panelLabelStyle } from "./panelStyles.js";
+import { ARROW_OPTIONS } from "../connectorOptions.js";
 
 interface ConnectorStyleEditorProps {
   style: ConnectorStyle;
   onChange: (patch: Partial<ConnectorStyle>) => void;
 }
-
-const ARROW_OPTIONS: { value: ArrowHeadType; label: string }[] = [
-  { value: "none", label: "None" },
-  { value: "open", label: "Open" },
-  { value: "filled", label: "Filled" },
-  { value: "crowsfoot", label: "Crowsfoot" },
-  { value: "one", label: "One" },
-];
 
 export function ConnectorStyleEditor({ style, onChange }: ConnectorStyleEditorProps) {
   return (
