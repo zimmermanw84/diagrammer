@@ -1,6 +1,6 @@
 import { Router } from "express";
 import type { Request, Response, NextFunction } from "express";
-import { DiagramDocumentSchema } from "@diagrammer/shared";
+import { DiagramDocumentSchema, sanitizeFilename } from "@diagrammer/shared";
 import { DiagramMapper } from "../services/DiagramMapper.js";
 import { ZodError } from "zod";
 
@@ -27,7 +27,7 @@ exportRouter.post("/vsdx", async (req: Request, res: Response, next: NextFunctio
     return;
   }
 
-  const filename = `${doc.meta.title.replace(/[^a-z0-9_\-]/gi, "_") || "diagram"}.vsdx`;
+  const filename = `${sanitizeFilename(doc.meta.title)}.vsdx`;
   res.setHeader("Content-Type", "application/vnd.ms-visio.drawing");
   res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
   res.setHeader("Content-Length", buffer.length);
