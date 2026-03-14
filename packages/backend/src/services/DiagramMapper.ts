@@ -1,11 +1,12 @@
 import { VisioDocument, ArrowHeads } from "ts-visio";
-import type { DiagramDocument, ShapeType, ArrowHeadType, StrokeDash } from "@diagrammer/shared";
+import type { ShapeGeometry, ConnectorRouting } from "ts-visio";
+import type { DiagramDocument, ShapeType, ArrowHeadType, StrokeDash, RoutingAlgorithm } from "@diagrammer/shared";
 
 // ---------------------------------------------------------------------------
 // Mapping tables
 // ---------------------------------------------------------------------------
 
-const GEOMETRY_MAP: Record<ShapeType, string> = {
+const GEOMETRY_MAP: Record<ShapeType, ShapeGeometry> = {
   rectangle: "rectangle",
   ellipse: "ellipse",
   diamond: "diamond",
@@ -29,7 +30,7 @@ const ARROW_HEAD_MAP: Record<ArrowHeadType, string> = {
   one: ArrowHeads.One,
 };
 
-const ROUTING_MAP: Record<string, string> = {
+const ROUTING_MAP: Record<RoutingAlgorithm, ConnectorRouting> = {
   straight: "straight",
   curved: "curved",
   right_angle: "orthogonal",
@@ -88,7 +89,7 @@ export class DiagramMapper {
           y: cy,
           width: shape.width,
           height: shape.height,
-          geometry: GEOMETRY_MAP[shape.type] as Parameters<typeof visioPage.addShape>[0]["geometry"],
+          geometry: GEOMETRY_MAP[shape.type],
           fillColor: shape.style.fillColor,
           lineColor: shape.style.strokeColor,
           linePattern: LINE_PATTERN_MAP[shape.style.strokeDash],
@@ -127,13 +128,13 @@ export class DiagramMapper {
         await visioPage.connectShapes(
           fromShape,
           toShape,
-          ARROW_HEAD_MAP[connector.style.arrowStart] as string,
-          ARROW_HEAD_MAP[connector.style.arrowEnd] as string,
+          ARROW_HEAD_MAP[connector.style.arrowStart],
+          ARROW_HEAD_MAP[connector.style.arrowEnd],
           {
             lineColor: connector.style.strokeColor,
             lineWeight: connector.style.strokeWidth,
             linePattern: LINE_PATTERN_MAP[connector.style.strokeDash],
-            routing: (ROUTING_MAP[connector.routing] ?? "straight") as "straight" | "orthogonal" | "curved",
+            routing: ROUTING_MAP[connector.routing],
           },
         );
       }
