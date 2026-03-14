@@ -623,11 +623,12 @@ describe("historyReducer — UNDO / REDO", () => {
 
 describe("LOAD_DOCUMENT", () => {
   const importedDoc = {
-    meta: { title: "Imported", author: "", description: "" },
+    id: "00000000-0000-0000-0000-000000000099",
+    meta: { title: "Imported", author: "", description: "", createdAt: new Date().toISOString() },
     styleSheet: { namedStyles: {} },
     pages: [
-      { id: "imported-page-1", name: "Page 1", width: 11, height: 8.5, shapes: [], connectors: [] },
-      { id: "imported-page-2", name: "Page 2", width: 11, height: 8.5, shapes: [], connectors: [] },
+      { id: "00000000-0000-0000-0000-000000000001", name: "Page 1", width: 11, height: 8.5, shapes: [], connectors: [] },
+      { id: "00000000-0000-0000-0000-000000000002", name: "Page 2", width: 11, height: 8.5, shapes: [], connectors: [] },
     ],
   };
 
@@ -640,7 +641,7 @@ describe("LOAD_DOCUMENT", () => {
   it("resets activePageId to pages[0].id", () => {
     const state = createInitialState();
     const next = dispatch(state, { type: "LOAD_DOCUMENT", payload: { document: importedDoc } });
-    expect(next.activePageId).toBe("imported-page-1");
+    expect(next.activePageId).toBe("00000000-0000-0000-0000-000000000001");
   });
 
   it("clears selection", () => {
@@ -665,5 +666,4 @@ describe("LOAD_DOCUMENT", () => {
     expect(state.future).toHaveLength(0);
     expect(state.document).toBe(importedDoc);
   });
-});
 });
