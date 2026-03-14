@@ -1,21 +1,12 @@
 import { useState } from "react";
 import type { DiagramDocument } from "@diagrammer/shared";
+import { sanitizeFilename } from "@diagrammer/shared";
 import { API_BASE } from "../config.js";
 import { THEME } from "../theme.js";
 
 interface ExportButtonProps {
   doc: DiagramDocument;
   disabled?: boolean;
-}
-
-/** Strip characters that are invalid in filenames on Windows and Unix. */
-export function sanitizeFilename(name: string): string {
-  return (
-    name
-      .replace(/[/\\:*?"<>|]/g, "")
-      .trim()
-      .replace(/\.+$/, "") || "diagram"
-  );
 }
 
 export function ExportButton({ doc, disabled }: ExportButtonProps) {

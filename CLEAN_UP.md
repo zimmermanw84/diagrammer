@@ -23,7 +23,7 @@
 | D1 | `ConnectorDrawing.tsx`, `SelectionOverlay.tsx`, `ShapePalette.tsx` | `(clientX - rect.left - t.x) / t.scale` duplicated in 3+ places — extract to `clientToSvgCoords()` util in `canvas/units.ts` | [x] |
 | D2 | `toolbar/ConnectorDefaults.tsx`, `properties/ConnectorStyleEditor.tsx` | `ARROW_OPTIONS` defined twice with same values | [x] |
 | D3 | `canvas/AlignmentToolbar.tsx` | `distributeH` and `distributeV` are identical logic on different axes — extract generic `distributeAlongAxis()` | [x] |
-| D4 | `toolbar/ExportButton.tsx` vs `backend/src/routes/export.ts` | Filename sanitization regex differs between frontend and backend — risk of filename mismatch | [ ] |
+| D4 | `toolbar/ExportButton.tsx` vs `backend/src/routes/export.ts` | Filename sanitization regex differs between frontend and backend — risk of filename mismatch | [x] |
 
 ---
 

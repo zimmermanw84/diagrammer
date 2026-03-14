@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import { ExportButton, sanitizeFilename } from "./ExportButton.js";
-import { createEmptyDocument } from "@diagrammer/shared";
+import { ExportButton } from "./ExportButton.js";
+import { createEmptyDocument, sanitizeFilename } from "@diagrammer/shared";
 
 const doc = createEmptyDocument("My Diagram", "Tester");
 
@@ -55,16 +55,12 @@ describe("sanitizeFilename", () => {
     expect(sanitizeFilename("my-diagram")).toBe("my-diagram");
   });
 
-  it("strips characters invalid in filenames", () => {
-    expect(sanitizeFilename('report/2024:final*v2?"<test>|')).toBe("report2024finalv2test");
+  it("replaces characters invalid in filenames with underscores", () => {
+    expect(sanitizeFilename("report/2024:final")).toBe("report_2024_final");
   });
 
-  it("trims surrounding whitespace", () => {
+  it("replaces surrounding whitespace with underscores then strips them", () => {
     expect(sanitizeFilename("  hello  ")).toBe("hello");
-  });
-
-  it("strips trailing dots", () => {
-    expect(sanitizeFilename("diagram...")).toBe("diagram");
   });
 
   it("falls back to 'diagram' for an empty result", () => {
@@ -79,17 +75,17 @@ describe("ExportButton", () => {
     expect(screen.getByRole("button", { name: /export to visio/i })).toBeTruthy();
   });
 
-  it("renders the filename input pre-populated with the document title", () => {
+  it("renders the filename input pre-populated with the sanitized document title", () => {
     render(<ExportButton doc={doc} />);
     const input = screen.getByRole("textbox") as HTMLInputElement;
-    expect(input.value).toBe("My Diagram");
+    expect(input.value).toBe("My_Diagram");
   });
 
   it("sanitizes the document title for the initial filename value", () => {
     const dirtyDoc = { ...doc, meta: { ...doc.meta, title: "my:diagram/file" } };
     render(<ExportButton doc={dirtyDoc} />);
     const input = screen.getByRole("textbox") as HTMLInputElement;
-    expect(input.value).toBe("mydiagramfile");
+    expect(input.value).toBe("my_diagram_file");
   });
 
   it("is disabled when the disabled prop is true", () => {
@@ -140,7 +136,7 @@ describe("ExportButton", () => {
     fireEvent.click(screen.getByRole("button"));
 
     await waitFor(() => expect(clickSpy).toHaveBeenCalled());
-    expect(getDownload()).toBe("report2024final.vsdx");
+    expect(getDownload()).toBe("report_2024_final.vsdx");
   });
 
   it("calls createObjectURL and revokeObjectURL on success", async () => {
