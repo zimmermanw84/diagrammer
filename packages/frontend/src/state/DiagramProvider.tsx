@@ -9,13 +9,14 @@ interface DiagramContextValue {
   dispatch: React.Dispatch<DiagramAction>;
   canUndo: boolean;
   canRedo: boolean;
+  saveError: boolean;
 }
 
 const DiagramContext = createContext<DiagramContextValue | null>(null);
 
 export function DiagramProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(historyReducer, undefined, createInitialHistoryState);
-  usePersistence(state.document);
+  const { saveError } = usePersistence(state.document);
   return (
     <DiagramContext.Provider
       value={{
@@ -23,6 +24,7 @@ export function DiagramProvider({ children }: { children: React.ReactNode }) {
         dispatch,
         canUndo: state.past.length > 0,
         canRedo: state.future.length > 0,
+        saveError,
       }}
     >
       {children}

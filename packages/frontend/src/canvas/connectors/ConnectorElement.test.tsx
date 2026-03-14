@@ -62,6 +62,15 @@ describe("ConnectorElement", () => {
     expect(getByText("my label")).toBeTruthy();
   });
 
+  it("renders label with theme text color, not hardcoded #333 (B4 regression)", () => {
+    const { container } = renderConnector({ connector: makeConnector({ label: "hello" }) });
+    const text = container.querySelector("text");
+    expect(text).toBeTruthy();
+    // Should not use the old hardcoded dark color — must use a theme color
+    expect(text?.getAttribute("fill")).not.toBe("#333");
+    expect(text?.getAttribute("fill")).toBeTruthy();
+  });
+
   it("does not render label when label is empty", () => {
     const { container } = renderConnector({ connector: makeConnector({ label: "" }) });
     expect(container.querySelector("text")).toBeNull();

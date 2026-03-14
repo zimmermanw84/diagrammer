@@ -59,7 +59,7 @@ describe("loadSavedDocument (extended)", () => {
 describe("usePersistence", () => {
   it("saves the document to localStorage after debounce", async () => {
     const doc = createEmptyDocument("Test", "Me");
-    renderHook(() => usePersistence(doc));
+    const { result } = renderHook(() => usePersistence(doc));
 
     expect(store[STORAGE_KEY]).toBeUndefined();
 
@@ -69,19 +69,39 @@ describe("usePersistence", () => {
     expect(store[STORAGE_KEY]).toBeDefined();
     const saved = JSON.parse(store[STORAGE_KEY]!);
     expect(saved.meta.title).toBe("Test");
+    expect(result.current.saveError).toBe(false);
   });
 
-  it("silently ignores localStorage.setItem errors", async () => {
-    vi.spyOn(localStorageMock, "setItem").mockImplementationOnce(() => {
+  it("returns saveError=true when localStorage.setItem throws (B3 regression)", async () => {
+    vi.spyOn(localStorageMock, "setItem").mockImplementation(() => {
       throw new Error("QuotaExceededError");
     });
 
     const doc = createEmptyDocument("Throws", "Me");
-    renderHook(() => usePersistence(doc));
+    const { result } = renderHook(() => usePersistence(doc));
 
-    // Should not throw after debounce fires
+    expect(result.current.saveError).toBe(false);
     await act(async () => { vi.advanceTimersByTime(300); });
-    // If we reach here without error the test passes; setItem was called but error swallowed
+    expect(result.current.saveError).toBe(true);
+  });
+
+  it("clears saveError when a subsequent save succeeds (B3 regression)", async () => {
+    const setItem = vi.spyOn(localStorageMock, "setItem")
+      .mockImplementationOnce(() => { throw new Error("QuotaExceededError"); });
+
+    const doc1 = createEmptyDocument("Fail", "Me");
+    const doc2 = createEmptyDocument("Succeed", "Me");
+    const { result, rerender } = renderHook(({ doc }) => usePersistence(doc), {
+      initialProps: { doc: doc1 },
+    });
+
+    await act(async () => { vi.advanceTimersByTime(300); });
+    expect(result.current.saveError).toBe(true);
+
+    setItem.mockRestore();
+    rerender({ doc: doc2 });
+    await act(async () => { vi.advanceTimersByTime(300); });
+    expect(result.current.saveError).toBe(false);
   });
 
   it("debounces: only the latest value is saved", async () => {

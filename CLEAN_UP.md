@@ -7,10 +7,10 @@
 | ID | File | Issue | Status |
 |----|------|-------|--------|
 | B1 | `packages/frontend/src/state/reducer.ts` | **DELETE_PAGE off-by-one** — finds index in unfiltered array, uses it on filtered array; can crash or select wrong page | [x] |
-| B2 | `packages/frontend/src/canvas/ConnectorDrawing.tsx` | `transformRef` initialized in `useEffect`, not `useRef()` — stale transform during first mount | [ ] |
-| B3 | `packages/frontend/src/state/persistence.ts` | Silent `localStorage` failure when quota exceeded — user loses work with no warning | [ ] |
-| B4 | `packages/frontend/src/canvas/connectors/ConnectorElement.tsx` | Connector label color hardcoded to `#333` — ignores theme, invisible on dark canvas | [ ] |
-| B5 | `packages/frontend/src/toolbar/useHealthCheck.ts` | Initial `check()` has no AbortController — sets state after unmount | [ ] |
+| B2 | `packages/frontend/src/canvas/ConnectorDrawing.tsx` | `transformRef` initialized in `useEffect`, not `useRef()` — stale transform during first mount | [n/a] — false positive; `transformRef.current = transform` runs synchronously on every render, already correct |
+| B3 | `packages/frontend/src/state/persistence.ts` | Silent `localStorage` failure when quota exceeded — user loses work with no warning | [x] |
+| B4 | `packages/frontend/src/canvas/connectors/ConnectorElement.tsx` | Connector label color hardcoded to `#333` — ignores theme, invisible on dark canvas | [x] |
+| B5 | `packages/frontend/src/toolbar/useHealthCheck.ts` | Initial `check()` has no AbortController — sets state after unmount | [x] |
 | B6 | `packages/frontend/src/canvas/PageTabBar.tsx` | Right-click context menu position is not clamped to viewport — menu renders off-screen when tab is near bottom/edge of window | [x] |
 | B7 | `packages/frontend/src/canvas/canvasConstants.ts` | `DEFAULT_SHAPE_SIZE` is a single value used for both width and height — default rectangles render as squares instead of rectangles | [x] |
 

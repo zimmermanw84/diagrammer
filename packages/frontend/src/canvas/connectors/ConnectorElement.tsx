@@ -1,6 +1,7 @@
 import type { DiagramConnector, DiagramShape, ArrowHeadType } from "@diagrammer/shared";
 import { toPixels } from "../units.js";
 import { DASH_ARRAYS } from "../canvasConstants.js";
+import { THEME } from "../../theme.js";
 
 interface ConnectorElementProps {
   connector: DiagramConnector;
@@ -210,7 +211,7 @@ export function ConnectorElement({ connector, fromShape, toShape, isSelected, on
           y={midY - 6}
           textAnchor="middle"
           fontSize={12}
-          fill="#333"
+          fill={THEME.text}
           style={{ pointerEvents: "none", userSelect: "none" }}
         >
           {connector.label}

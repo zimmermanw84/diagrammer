@@ -23,7 +23,7 @@ import type { InProgress } from "./canvas/ConnectorDrawing.js";
 import type { ConnectionPoint } from "./canvas/shapes/ConnectionHandles.js";
 
 function DiagramEditor() {
-  const { state, dispatch, canUndo, canRedo } = useDiagram();
+  const { state, dispatch, canUndo, canRedo, saveError } = useDiagram();
   const activePage = (
     state.document.pages.find((p) => p.id === state.activePageId) ?? state.document.pages[0]
   )!;
@@ -126,6 +126,11 @@ function DiagramEditor() {
   return (
     <>
       {!isOnline && <OfflineBanner />}
+      {saveError && (
+        <div style={styles.saveErrorBanner}>
+          ⚠ Could not save — browser storage is full. Export your diagram to avoid losing work.
+        </div>
+      )}
       <div style={styles.shell}>
         <div style={styles.toolbar}>
           <ShapePalette
@@ -336,5 +341,19 @@ const styles: Record<string, React.CSSProperties> = {
     padding: "16px",
     borderLeft: `1px solid ${THEME.surface0}`,
     overflowY: "auto",
+  },
+  saveErrorBanner: {
+    position: "fixed" as const,
+    bottom: "40px",
+    left: "50%",
+    transform: "translateX(-50%)",
+    background: "#f38ba8",
+    color: "#1e1e2e",
+    padding: "8px 16px",
+    borderRadius: "6px",
+    fontSize: "13px",
+    fontWeight: 500,
+    zIndex: 2000,
+    boxShadow: "0 4px 12px rgba(0,0,0,0.4)",
   },
 };

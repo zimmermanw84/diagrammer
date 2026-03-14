@@ -111,4 +111,25 @@ describe("useHealthCheck", () => {
     // Only the initial call, no more polls after unmount
     expect(fetch).toHaveBeenCalledTimes(1);
   });
+
+  it("does not update state after unmount even if fetch resolves late (B5 regression)", async () => {
+    // Fetch resolves only after we explicitly resolve it
+    let resolveFetch!: (v: unknown) => void;
+    (fetch as ReturnType<typeof vi.fn>).mockReturnValue(
+      new Promise((r) => { resolveFetch = r; })
+    );
+
+    const { result, unmount } = renderHook(() => useHealthCheck());
+    // Unmount before fetch resolves
+    unmount();
+
+    // Now resolve the fetch — state must NOT change (no React warning)
+    await act(async () => {
+      resolveFetch({ ok: true });
+      await Promise.resolve();
+    });
+
+    // isOnline remains at initial optimistic value (true); no "setState on unmounted" error
+    expect(result.current.isOnline).toBe(true);
+  });
 });

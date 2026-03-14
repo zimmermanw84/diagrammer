@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { DiagramDocumentSchema } from "@diagrammer/shared";
 import type { DiagramDocument } from "@diagrammer/shared";
 
@@ -16,16 +16,19 @@ export function loadSavedDocument(): DiagramDocument | null {
   }
 }
 
-export function usePersistence(document: DiagramDocument): void {
+export function usePersistence(document: DiagramDocument): { saveError: boolean } {
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [saveError, setSaveError] = useState(false);
 
   useEffect(() => {
     if (timerRef.current) clearTimeout(timerRef.current);
     timerRef.current = setTimeout(() => {
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(document));
+        setSaveError(false);
       } catch {
-        // localStorage unavailable or full — silently ignore
+        // localStorage unavailable or quota exceeded — surface to the user
+        setSaveError(true);
       }
     }, DEBOUNCE_MS);
 
@@ -33,4 +36,6 @@ export function usePersistence(document: DiagramDocument): void {
       if (timerRef.current) clearTimeout(timerRef.current);
     };
   }, [document]);
+
+  return { saveError };
 }
