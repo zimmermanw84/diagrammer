@@ -15,7 +15,7 @@ const EPHEMERAL_ACTIONS = new Set<DiagramAction["type"]>([
 export interface State {
   document: DiagramDocument;
   activePageId: string;
-  selection: string | null;
+  selection: string[];
   defaultConnectorStyle: ConnectorStyle;
 }
 
@@ -24,7 +24,7 @@ export function createFreshState(): State {
   return {
     document,
     activePageId: document.pages[0]!.id,
-    selection: null,
+    selection: [],
     defaultConnectorStyle: { ...DEFAULT_CONNECTOR_STYLE },
   };
 }
@@ -35,7 +35,7 @@ export function createInitialState(): State {
     return {
       document: saved,
       activePageId: saved.pages[0]!.id,
-      selection: null,
+      selection: [],
       defaultConnectorStyle: { ...DEFAULT_CONNECTOR_STYLE },
     };
   }
@@ -86,6 +86,23 @@ export function diagramReducer(state: State, action: DiagramAction): State {
       };
     }
 
+    case "MOVE_SHAPE_BATCH": {
+      const moveMap = new Map(action.payload.moves.map((m) => [m.id, m]));
+      return {
+        ...state,
+        document: {
+          ...state.document,
+          pages: updatePage(state.document.pages, state.activePageId, (page) => ({
+            ...page,
+            shapes: page.shapes.map((shape) => {
+              const move = moveMap.get(shape.id);
+              return move ? { ...shape, x: move.x, y: move.y } : shape;
+            }),
+          })),
+        },
+      };
+    }
+
     case "RESIZE_SHAPE": {
       const { id, width, height } = action.payload;
       return {
@@ -106,7 +123,7 @@ export function diagramReducer(state: State, action: DiagramAction): State {
       const { id } = action.payload;
       return {
         ...state,
-        selection: state.selection === id ? null : state.selection,
+        selection: state.selection.filter((s) => s !== id),
         document: {
           ...state.document,
           pages: updatePage(state.document.pages, state.activePageId, (page) => ({
@@ -212,6 +229,7 @@ export function diagramReducer(state: State, action: DiagramAction): State {
       const { id } = action.payload;
       return {
         ...state,
+        selection: state.selection.filter((s) => s !== id),
         document: {
           ...state.document,
           pages: updatePage(state.document.pages, state.activePageId, (page) => ({
@@ -243,7 +261,7 @@ export function diagramReducer(state: State, action: DiagramAction): State {
       return {
         ...state,
         activePageId: action.payload.pageId,
-        selection: null,
+        selection: [],
       };
     }
 
@@ -272,13 +290,24 @@ export function diagramReducer(state: State, action: DiagramAction): State {
       return {
         ...state,
         activePageId,
-        selection: null,
+        selection: [],
         document: { ...state.document, pages },
       };
     }
 
     case "SELECT": {
-      return { ...state, selection: action.payload.id };
+      const { id, multi } = action.payload;
+      if (id === null) return { ...state, selection: [] };
+      if (multi) {
+        const already = state.selection.includes(id);
+        return {
+          ...state,
+          selection: already
+            ? state.selection.filter((s) => s !== id)
+            : [...state.selection, id],
+        };
+      }
+      return { ...state, selection: [id] };
     }
 
     case "UPDATE_CONNECTOR_STYLE": {
@@ -329,7 +358,6 @@ export function historyReducer(state: HistoryState, action: DiagramAction): Hist
     if (state.past.length === 0) return state;
     const previous = state.past[state.past.length - 1]!;
     const newPast = state.past.slice(0, -1);
-    // If activePageId no longer exists in the restored document, fall back to page 0
     const validPageId = previous.pages.some((p) => p.id === state.activePageId)
       ? state.activePageId
       : previous.pages[0]!.id;

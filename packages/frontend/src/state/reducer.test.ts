@@ -18,7 +18,7 @@ describe("createInitialState", () => {
     const state = createInitialState();
     expect(state.document.pages).toHaveLength(1);
     expect(state.activePageId).toBe(state.document.pages[0].id);
-    expect(state.selection).toBeNull();
+    expect(state.selection).toEqual([]);
   });
 });
 
@@ -182,10 +182,10 @@ describe("DELETE_SHAPE", () => {
     state = dispatch(state, { type: "ADD_SHAPE", payload: makeShapePayload() });
     const shapeId = state.document.pages[0].shapes[0].id;
     state = dispatch(state, { type: "SELECT", payload: { id: shapeId } });
-    expect(state.selection).toBe(shapeId);
+    expect(state.selection).toEqual([shapeId]);
 
     state = dispatch(state, { type: "DELETE_SHAPE", payload: { id: shapeId } });
-    expect(state.selection).toBeNull();
+    expect(state.selection).toEqual([]);
   });
 });
 
@@ -341,11 +341,11 @@ describe("SET_ACTIVE_PAGE", () => {
   it("clears the selection when switching pages", () => {
     let state = createInitialState();
     // Manually set selection
-    state = { ...state, selection: "some-shape-id" };
+    state = { ...state, selection: ["some-shape-id"] };
     state = dispatch(state, { type: "ADD_PAGE", payload: { name: "Page 2", width: 11, height: 8.5 } });
     const page2Id = state.document.pages[1].id;
     state = dispatch(state, { type: "SET_ACTIVE_PAGE", payload: { pageId: page2Id } });
-    expect(state.selection).toBeNull();
+    expect(state.selection).toEqual([]);
   });
 });
 
@@ -398,7 +398,7 @@ describe("RESET", () => {
     expect(state.document.pages).toHaveLength(1);
     expect(state.document.pages[0].shapes).toHaveLength(0);
     expect(state.document.pages[0].connectors).toHaveLength(0);
-    expect(state.selection).toBeNull();
+    expect(state.selection).toEqual([]);
   });
 });
 
@@ -467,10 +467,10 @@ describe("DELETE_PAGE", () => {
   it("clears selection when deleting a page", () => {
     let state = createInitialState();
     state = dispatch(state, { type: "ADD_PAGE", payload: { name: "Page 2", width: 11, height: 8.5 } });
-    state = { ...state, selection: "some-shape" };
+    state = { ...state, selection: ["some-shape"] };
     const page2Id = state.document.pages[1].id;
     state = dispatch(state, { type: "DELETE_PAGE", payload: { pageId: page2Id } });
-    expect(state.selection).toBeNull();
+    expect(state.selection).toEqual([]);
   });
 });
 
@@ -543,7 +543,7 @@ describe("historyReducer — UNDO / REDO", () => {
 
     state = hdispatch(state, { type: "SELECT", payload: { id: shapeId } });
     expect(state.past).toHaveLength(pastLengthBefore);
-    expect(state.selection).toBe(shapeId);
+    expect(state.selection).toEqual([shapeId]);
   });
 
   it("RESET clears past and future", () => {

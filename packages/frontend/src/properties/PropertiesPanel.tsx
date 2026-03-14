@@ -12,11 +12,23 @@ export function PropertiesPanel() {
   )!;
   const { selection } = state;
 
-  if (!selection) {
+  if (selection.length === 0) {
     return <p style={emptyStyle}>Select a shape to edit its properties</p>;
   }
 
-  const shape = activePage.shapes.find((s) => s.id === selection);
+  // Multiple shapes selected — no property editing
+  if (selection.length > 1) {
+    const shapeCount = selection.filter((id) => activePage.shapes.some((s) => s.id === id)).length;
+    return (
+      <p style={emptyStyle}>
+        {shapeCount} shape{shapeCount !== 1 ? "s" : ""} selected
+      </p>
+    );
+  }
+
+  const selectedId = selection[0]!;
+
+  const shape = activePage.shapes.find((s) => s.id === selectedId);
   if (shape) {
     const propCount = Object.keys(shape.properties).length;
     return (
@@ -45,7 +57,7 @@ export function PropertiesPanel() {
     );
   }
 
-  const connector = activePage.connectors.find((c) => c.id === selection);
+  const connector = activePage.connectors.find((c) => c.id === selectedId);
   if (connector) {
     return (
       <div style={panelStyle}>

@@ -200,26 +200,33 @@ describe("Canvas — zoom", () => {
 // ---------------------------------------------------------------------------
 
 describe("Canvas — deselect", () => {
-  it("calls onDeselect when the SVG itself is clicked", () => {
+  it("calls onDeselect on mousedown+mouseup without drag on SVG background", () => {
     const onDeselect = vi.fn();
     const { container } = render(<Canvas page={PAGE} onDeselect={onDeselect} />);
-    fireEvent.click(container.querySelector("svg")!);
-    expect(onDeselect).toHaveBeenCalledOnce();
-  });
-
-  it("calls onDeselect when a background child element is clicked", () => {
-    const onDeselect = vi.fn();
-    const { container } = render(<Canvas page={PAGE} onDeselect={onDeselect} />);
-    // The page background rect is a direct child of the transform group
-    const rect = container.querySelector("rect")!;
-    fireEvent.click(rect);
+    const svg = container.querySelector("svg")!;
+    // Same position for mousedown and mouseup = click, not a rubber-band drag
+    fireEvent.mouseDown(svg, { button: 0, clientX: 100, clientY: 100 });
+    fireEvent.mouseUp(svg, { button: 0, clientX: 100, clientY: 100 });
     expect(onDeselect).toHaveBeenCalledOnce();
   });
 
   it("does not call onDeselect when no handler is provided", () => {
     const { container } = render(<Canvas page={PAGE} />);
-    // Should not throw
-    expect(() => fireEvent.click(container.querySelector("svg")!)).not.toThrow();
+    const svg = container.querySelector("svg")!;
+    expect(() => {
+      fireEvent.mouseDown(svg, { button: 0, clientX: 100, clientY: 100 });
+      fireEvent.mouseUp(svg, { button: 0, clientX: 100, clientY: 100 });
+    }).not.toThrow();
+  });
+
+  it("calls onRubberBandSelect when mouse is dragged more than 4px", () => {
+    const onRubberBandSelect = vi.fn();
+    const { container } = render(<Canvas page={PAGE} onRubberBandSelect={onRubberBandSelect} />);
+    const svg = container.querySelector("svg")!;
+    fireEvent.mouseDown(svg, { button: 0, clientX: 100, clientY: 100 });
+    fireEvent.mouseMove(svg, { clientX: 200, clientY: 200 });
+    fireEvent.mouseUp(svg, { button: 0, clientX: 200, clientY: 200 });
+    expect(onRubberBandSelect).toHaveBeenCalledOnce();
   });
 });
 

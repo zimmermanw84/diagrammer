@@ -4,11 +4,11 @@ import { ConnectorElement } from "./ConnectorElement.js";
 interface ConnectorLayerProps {
   connectors: DiagramConnector[];
   shapes: DiagramShape[];
-  selectedId: string | null;
+  selectedIds: string[];
   onSelect: (id: string) => void;
 }
 
-export function ConnectorLayer({ connectors, shapes, selectedId, onSelect }: ConnectorLayerProps) {
+export function ConnectorLayer({ connectors, shapes, selectedIds, onSelect }: ConnectorLayerProps) {
   const shapeMap = new Map(shapes.map((s) => [s.id, s]));
 
   return (
@@ -23,7 +23,7 @@ export function ConnectorLayer({ connectors, shapes, selectedId, onSelect }: Con
             connector={connector}
             fromShape={from}
             toShape={to}
-            isSelected={connector.id === selectedId}
+            isSelected={selectedIds.includes(connector.id)}
             onSelect={onSelect}
           />
         );

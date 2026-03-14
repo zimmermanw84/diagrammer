@@ -21,7 +21,8 @@ export type DiagramAction =
   | { type: "SET_ACTIVE_PAGE"; payload: { pageId: string } }
   | { type: "RENAME_PAGE"; payload: { pageId: string; name: string } }
   | { type: "DELETE_PAGE"; payload: { pageId: string } }
-  | { type: "SELECT"; payload: { id: string | null } }
+  | { type: "SELECT"; payload: { id: string | null; multi?: boolean } }
+  | { type: "MOVE_SHAPE_BATCH"; payload: { moves: { id: string; x: number; y: number }[] } }
   | { type: "UPDATE_CONNECTOR_STYLE"; payload: { id: string; style: Partial<ConnectorStyle> } }
   | { type: "RESET" }
   | { type: "UNDO" }

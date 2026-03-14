@@ -5,6 +5,7 @@ import { ShapeLayer } from "./canvas/shapes/ShapeLayer.js";
 import { ConnectorLayer } from "./canvas/connectors/ConnectorLayer.js";
 import { ConnectorDrawing, resolveConnectionPoint } from "./canvas/ConnectorDrawing.js";
 import { SelectionOverlay } from "./canvas/SelectionOverlay.js";
+import { AlignmentToolbar } from "./canvas/AlignmentToolbar.js";
 import { useKeyboardShortcuts } from "./canvas/useKeyboardShortcuts.js";
 import { PropertiesPanel } from "./properties/PropertiesPanel.js";
 import { DEFAULT_SHAPE_STYLE } from "@diagrammer/shared";
@@ -28,7 +29,14 @@ function DiagramEditor() {
   const svgRef = useRef<SVGSVGElement>(null);
   const [transform, setTransform] = useState({ scale: 1, x: 0, y: 0 });
   const [inProgress, setInProgress] = useState<InProgress | null>(null);
-  const selectedShape = activePage.shapes.find((s) => s.id === state.selection) ?? null;
+
+  // Derive selected shapes (for SelectionOverlay + AlignmentToolbar)
+  const selectedShapes = activePage.shapes.filter((s) => state.selection.includes(s.id));
+  // Single selected connector (for ConnectorDefaults toolbar)
+  const selectedConnector = activePage.connectors.find(
+    (c) => state.selection.length === 1 && c.id === state.selection[0]
+  );
+
   const { isOnline } = useHealthCheck();
 
   useKeyboardShortcuts({
@@ -58,6 +66,27 @@ function DiagramEditor() {
     });
   };
 
+  const handleRubberBandSelect = (rect: { x: number; y: number; w: number; h: number }) => {
+    const hits = activePage.shapes
+      .filter(
+        (s) =>
+          s.x < rect.x + rect.w &&
+          s.x + s.width > rect.x &&
+          s.y < rect.y + rect.h &&
+          s.y + s.height > rect.y
+      )
+      .map((s) => s.id);
+    if (hits.length === 0) {
+      dispatch({ type: "SELECT", payload: { id: null } });
+    } else {
+      // Select all hits by dispatching multiple multi-selects
+      dispatch({ type: "SELECT", payload: { id: null } }); // clear first
+      for (const id of hits) {
+        dispatch({ type: "SELECT", payload: { id, multi: true } });
+      }
+    }
+  };
+
   return (
     <>
       {!isOnline && <OfflineBanner />}
@@ -83,12 +112,8 @@ function DiagramEditor() {
             }
           />
           <ConnectorDefaults
-            style={
-              activePage.connectors.find((c) => c.id === state.selection)?.style ??
-              state.defaultConnectorStyle
-            }
+            style={selectedConnector?.style ?? state.defaultConnectorStyle}
             onChange={(patch) => {
-              const selectedConnector = activePage.connectors.find((c) => c.id === state.selection);
               if (selectedConnector) {
                 dispatch({ type: "UPDATE_CONNECTOR_STYLE", payload: { id: selectedConnector.id, style: patch } });
               } else {
@@ -131,22 +156,29 @@ function DiagramEditor() {
 
         <div style={styles.canvas}>
           <div style={styles.canvasArea}>
+            {selectedShapes.length >= 2 && (
+              <AlignmentToolbar
+                shapes={selectedShapes}
+                onAlign={(moves) => dispatch({ type: "MOVE_SHAPE_BATCH", payload: { moves } })}
+              />
+            )}
             <Canvas
               page={activePage}
               svgRef={svgRef}
               onTransformChange={setTransform}
               onDeselect={() => dispatch({ type: "SELECT", payload: { id: null } })}
+              onRubberBandSelect={handleRubberBandSelect}
             >
               <ConnectorLayer
                 connectors={activePage.connectors}
                 shapes={activePage.shapes}
-                selectedId={state.selection}
+                selectedIds={state.selection}
                 onSelect={(id) => dispatch({ type: "SELECT", payload: { id } })}
               />
               <ShapeLayer
                 shapes={activePage.shapes}
-                selectedId={state.selection}
-                onSelect={(id) => dispatch({ type: "SELECT", payload: { id } })}
+                selectedIds={state.selection}
+                onSelect={(id, multi) => dispatch({ type: "SELECT", payload: { id, multi } })}
                 onMove={(id, dx, dy) => dispatch({ type: "MOVE_SHAPE", payload: { id, dx, dy } })}
                 onLabelChange={(id, label) => dispatch({ type: "SET_LABEL", payload: { id, label } })}
                 onStartConnect={handleStartConnect}
@@ -159,14 +191,15 @@ function DiagramEditor() {
                 inProgress={inProgress}
                 setInProgress={setInProgress}
               />
-              {selectedShape && (
+              {selectedShapes.map((shape) => (
                 <SelectionOverlay
-                  shape={selectedShape}
+                  key={shape.id}
+                  shape={shape}
                   onResize={(id, width, height) =>
                     dispatch({ type: "RESIZE_SHAPE", payload: { id, width, height } })
                   }
                 />
-              )}
+              ))}
             </Canvas>
           </div>
           <PageTabBar

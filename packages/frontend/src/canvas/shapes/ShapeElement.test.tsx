@@ -25,7 +25,14 @@ describe("ShapeElement", () => {
     const onSelect = vi.fn();
     const { container } = renderShape({ onSelect });
     fireEvent.mouseDown(container.querySelector("g")!);
-    expect(onSelect).toHaveBeenCalledWith("shape-1");
+    expect(onSelect).toHaveBeenCalledWith("shape-1", false);
+  });
+
+  it("calls onSelect with multi=true when shift is held", () => {
+    const onSelect = vi.fn();
+    const { container } = renderShape({ onSelect });
+    fireEvent.mouseDown(container.querySelector("g")!, { shiftKey: true });
+    expect(onSelect).toHaveBeenCalledWith("shape-1", true);
   });
 
   it("renders the shape geometry when isSelected", () => {

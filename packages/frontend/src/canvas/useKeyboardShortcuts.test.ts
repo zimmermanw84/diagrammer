@@ -17,7 +17,7 @@ describe("useKeyboardShortcuts", () => {
   it("dispatches DELETE_SHAPE when Delete is pressed with a shape selected", () => {
     const dispatch = vi.fn();
     renderHook(() => useKeyboardShortcuts({
-      selection: "s1",
+      selection: ["s1"],
       shapes: [makeShape("s1")],
       connectors: [],
       dispatch,
@@ -29,7 +29,7 @@ describe("useKeyboardShortcuts", () => {
   it("dispatches DELETE_CONNECTOR when Delete is pressed with a connector selected", () => {
     const dispatch = vi.fn();
     renderHook(() => useKeyboardShortcuts({
-      selection: "c1",
+      selection: ["c1"],
       shapes: [],
       connectors: [makeConnector("c1")],
       dispatch,
@@ -41,7 +41,7 @@ describe("useKeyboardShortcuts", () => {
   it("dispatches on Backspace as well", () => {
     const dispatch = vi.fn();
     renderHook(() => useKeyboardShortcuts({
-      selection: "s1",
+      selection: ["s1"],
       shapes: [makeShape("s1")],
       connectors: [],
       dispatch,
@@ -50,10 +50,10 @@ describe("useKeyboardShortcuts", () => {
     expect(dispatch).toHaveBeenCalledWith({ type: "DELETE_SHAPE", payload: { id: "s1" } });
   });
 
-  it("does nothing when selection is null", () => {
+  it("does nothing when selection is empty", () => {
     const dispatch = vi.fn();
     renderHook(() => useKeyboardShortcuts({
-      selection: null,
+      selection: [],
       shapes: [makeShape("s1")],
       connectors: [],
       dispatch,
@@ -62,10 +62,23 @@ describe("useKeyboardShortcuts", () => {
     expect(dispatch).not.toHaveBeenCalled();
   });
 
+  it("deletes all selected shapes when multiple are selected", () => {
+    const dispatch = vi.fn();
+    renderHook(() => useKeyboardShortcuts({
+      selection: ["s1", "s2"],
+      shapes: [makeShape("s1"), makeShape("s2")],
+      connectors: [],
+      dispatch,
+    }));
+    fireEvent.keyDown(document.body, { key: "Delete" });
+    expect(dispatch).toHaveBeenCalledWith({ type: "DELETE_SHAPE", payload: { id: "s1" } });
+    expect(dispatch).toHaveBeenCalledWith({ type: "DELETE_SHAPE", payload: { id: "s2" } });
+  });
+
   it("dispatches UNDO on Cmd+Z", () => {
     const dispatch = vi.fn();
     renderHook(() => useKeyboardShortcuts({
-      selection: null,
+      selection: [],
       shapes: [],
       connectors: [],
       dispatch,
@@ -77,7 +90,7 @@ describe("useKeyboardShortcuts", () => {
   it("dispatches UNDO on Ctrl+Z", () => {
     const dispatch = vi.fn();
     renderHook(() => useKeyboardShortcuts({
-      selection: null,
+      selection: [],
       shapes: [],
       connectors: [],
       dispatch,
@@ -89,7 +102,7 @@ describe("useKeyboardShortcuts", () => {
   it("dispatches REDO on Cmd+Y", () => {
     const dispatch = vi.fn();
     renderHook(() => useKeyboardShortcuts({
-      selection: null,
+      selection: [],
       shapes: [],
       connectors: [],
       dispatch,
@@ -101,7 +114,7 @@ describe("useKeyboardShortcuts", () => {
   it("dispatches REDO on Cmd+Shift+Z", () => {
     const dispatch = vi.fn();
     renderHook(() => useKeyboardShortcuts({
-      selection: null,
+      selection: [],
       shapes: [],
       connectors: [],
       dispatch,
@@ -113,7 +126,7 @@ describe("useKeyboardShortcuts", () => {
   it("does not dispatch UNDO when target is an input", () => {
     const dispatch = vi.fn();
     renderHook(() => useKeyboardShortcuts({
-      selection: null,
+      selection: [],
       shapes: [],
       connectors: [],
       dispatch,
