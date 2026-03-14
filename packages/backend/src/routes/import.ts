@@ -44,7 +44,10 @@ importRouter.post(
       DiagramDocumentSchema.parse(doc);
     } catch (err) {
       if (err instanceof ZodError) {
-        next(new Error(`DiagramImporter produced invalid document: ${err.message}`));
+        // Internal error — importer produced a document that fails schema validation
+        const detail = new Error(`DiagramImporter produced invalid document: ${err.message}`);
+        (detail as NodeJS.ErrnoException & { status?: number }).status = 500;
+        next(detail);
         return;
       }
       next(err);

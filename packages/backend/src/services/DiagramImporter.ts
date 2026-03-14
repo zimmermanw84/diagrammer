@@ -117,19 +117,25 @@ export class DiagramImporter {
     const pageHeight = visioPage.pageHeight;
 
     const visioShapes = visioPage.getShapes();
+    const visioConnectors = visioPage.getConnectors();
 
-    // Build Visio shape ID → new UUID map for connector wiring
+    // getShapes() includes connector shapes (1D shapes with h=0) — exclude them
+    const connectorShapeIds = new Set(visioConnectors.map((c) => c.id));
+
+    // Build Visio shape ID → new UUID map for connector wiring (2D shapes only)
     const idMap = new Map<string, string>();
     for (const s of visioShapes) {
-      idMap.set(s.id, crypto.randomUUID());
+      if (!connectorShapeIds.has(s.id)) {
+        idMap.set(s.id, crypto.randomUUID());
+      }
     }
 
     const shapes: DiagramShape[] = visioShapes
+      .filter((s) => !connectorShapeIds.has(s.id))
       .map((s) => DiagramImporter.importShape(s, pageHeight, idMap))
       .filter((s): s is DiagramShape => s !== undefined);
 
-    const connectors: DiagramConnector[] = visioPage
-      .getConnectors()
+    const connectors: DiagramConnector[] = visioConnectors
       .map((c) => DiagramImporter.importConnector(c, idMap))
       .filter((c): c is DiagramConnector => c !== undefined);
 
