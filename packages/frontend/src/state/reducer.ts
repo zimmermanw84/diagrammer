@@ -333,6 +333,16 @@ export function diagramReducer(state: State, action: DiagramAction): State {
         defaultConnectorStyle: { ...state.defaultConnectorStyle, ...action.payload },
       };
 
+    case "LOAD_DOCUMENT": {
+      const { document } = action.payload;
+      return {
+        ...state,
+        document,
+        activePageId: document.pages[0]!.id,
+        selection: [],
+      };
+    }
+
     case "RESET":
       return createFreshState();
 
@@ -389,6 +399,11 @@ export function historyReducer(state: HistoryState, action: DiagramAction): Hist
 
   if (action.type === "RESET") {
     return { ...createFreshState(), past: [], future: [] };
+  }
+
+  if (action.type === "LOAD_DOCUMENT") {
+    const next = diagramReducer(state, action);
+    return { ...next, past: [], future: [] };
   }
 
   const nextState = diagramReducer(state, action);

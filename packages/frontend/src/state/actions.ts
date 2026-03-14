@@ -1,4 +1,5 @@
 import type {
+  DiagramDocument,
   DiagramShape,
   DiagramConnector,
   DiagramPage,
@@ -27,4 +28,5 @@ export type DiagramAction =
   | { type: "RESET" }
   | { type: "UNDO" }
   | { type: "REDO" }
-  | { type: "SET_DEFAULT_CONNECTOR_STYLE"; payload: Partial<ConnectorStyle> };
+  | { type: "SET_DEFAULT_CONNECTOR_STYLE"; payload: Partial<ConnectorStyle> }
+  | { type: "LOAD_DOCUMENT"; payload: { document: DiagramDocument } };

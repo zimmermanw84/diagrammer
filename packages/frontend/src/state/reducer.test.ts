@@ -620,3 +620,50 @@ describe("historyReducer — UNDO / REDO", () => {
     expect(state.future).toHaveLength(3);
   });
 });
+
+describe("LOAD_DOCUMENT", () => {
+  const importedDoc = {
+    meta: { title: "Imported", author: "", description: "" },
+    styleSheet: { namedStyles: {} },
+    pages: [
+      { id: "imported-page-1", name: "Page 1", width: 11, height: 8.5, shapes: [], connectors: [] },
+      { id: "imported-page-2", name: "Page 2", width: 11, height: 8.5, shapes: [], connectors: [] },
+    ],
+  };
+
+  it("replaces the document", () => {
+    const state = createInitialState();
+    const next = dispatch(state, { type: "LOAD_DOCUMENT", payload: { document: importedDoc } });
+    expect(next.document).toBe(importedDoc);
+  });
+
+  it("resets activePageId to pages[0].id", () => {
+    const state = createInitialState();
+    const next = dispatch(state, { type: "LOAD_DOCUMENT", payload: { document: importedDoc } });
+    expect(next.activePageId).toBe("imported-page-1");
+  });
+
+  it("clears selection", () => {
+    let state = createInitialState();
+    state = dispatch(state, { type: "ADD_SHAPE", payload: makeShapePayload() });
+    const shapeId = state.document.pages[0].shapes[0].id;
+    state = dispatch(state, { type: "SELECT", payload: { id: shapeId } });
+    expect(state.selection).toHaveLength(1);
+
+    const next = dispatch(state, { type: "LOAD_DOCUMENT", payload: { document: importedDoc } });
+    expect(next.selection).toEqual([]);
+  });
+
+  it("clears undo/redo history in historyReducer", () => {
+    let state = createInitialHistoryState();
+    state = hdispatch(state, { type: "ADD_SHAPE", payload: makeShapePayload() });
+    state = hdispatch(state, { type: "ADD_SHAPE", payload: makeShapePayload() });
+    expect(state.past).toHaveLength(2);
+
+    state = hdispatch(state, { type: "LOAD_DOCUMENT", payload: { document: importedDoc } });
+    expect(state.past).toHaveLength(0);
+    expect(state.future).toHaveLength(0);
+    expect(state.document).toBe(importedDoc);
+  });
+});
+});
