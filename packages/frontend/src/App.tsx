@@ -10,6 +10,7 @@ import { useKeyboardShortcuts } from "./canvas/useKeyboardShortcuts.js";
 import { PropertiesPanel } from "./properties/PropertiesPanel.js";
 import { DEFAULT_SHAPE_STYLE } from "@diagrammer/shared";
 import type { ShapeType } from "@diagrammer/shared";
+import { toInches } from "./canvas/units.js";
 import { ShapePalette } from "./toolbar/ShapePalette.js";
 import { PageTabBar } from "./canvas/PageTabBar.js";
 import { ConnectorDefaults } from "./toolbar/ConnectorDefaults.js";
@@ -64,6 +65,39 @@ function DiagramEditor() {
         routing: "straight",
       },
     });
+  };
+
+  const handleImageDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    const file = Array.from(e.dataTransfer.files).find((f) => f.type.startsWith("image/"));
+    if (!file || !svgRef.current) return;
+
+    const svgRect = svgRef.current.getBoundingClientRect();
+    const clientX = e.clientX - svgRect.left;
+    const clientY = e.clientY - svgRect.top;
+    const svgX = (clientX - transform.x) / transform.scale;
+    const svgY = (clientY - transform.y) / transform.scale;
+    const x = toInches(svgX) - DEFAULT_SHAPE_SIZE / 2;
+    const y = toInches(svgY) - DEFAULT_SHAPE_SIZE / 2;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      dispatch({
+        type: "ADD_SHAPE",
+        payload: {
+          type: "image",
+          x,
+          y,
+          width: DEFAULT_SHAPE_SIZE * 2,
+          height: DEFAULT_SHAPE_SIZE * 2,
+          label: "",
+          style: { ...DEFAULT_SHAPE_STYLE, fillColor: "transparent", strokeColor: "#ccc" },
+          properties: {},
+          src: reader.result as string,
+        },
+      });
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleRubberBandSelect = (rect: { x: number; y: number; w: number; h: number }) => {
@@ -155,7 +189,7 @@ function DiagramEditor() {
         </div>
 
         <div style={styles.canvas}>
-          <div style={styles.canvasArea}>
+          <div style={styles.canvasArea} onDrop={handleImageDrop} onDragOver={(e) => e.preventDefault()}>
             {selectedShapes.length >= 2 && (
               <AlignmentToolbar
                 shapes={selectedShapes}

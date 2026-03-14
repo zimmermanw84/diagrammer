@@ -306,11 +306,11 @@ These are independent of each other and can be picked up in any order after Phas
 ### T19 · Multi-Select + Alignment Tools
 **Depends on:** T09
 
-- [ ] Change `selection` from `string | null` to `string[]`
-- [ ] Shift+click adds/removes from selection; drag on empty canvas → rubber-band selection rect
-- [ ] Show alignment toolbar when 2+ shapes selected
-- [ ] Implement: align left/center/right, align top/middle/bottom, distribute H/V
-- [ ] All alignment ops dispatch a single `MOVE_SHAPE_BATCH` action
+- [x] Change `selection` from `string | null` to `string[]`
+- [x] Shift+click adds/removes from selection; drag on empty canvas → rubber-band selection rect
+- [x] Show alignment toolbar when 2+ shapes selected
+- [x] Implement: align left/center/right, align top/middle/bottom, distribute H/V
+- [x] All alignment ops dispatch a single `MOVE_SHAPE_BATCH` action
 
 ---
 
@@ -337,9 +337,9 @@ These are independent of each other and can be picked up in any order after Phas
 ### T22 · Image Embedding
 **Depends on:** T07, T11
 
-- [ ] Handle image file drop on canvas: read as base64 data URL, dispatch `ADD_SHAPE` with `type: 'image'`
-- [ ] Render `type: 'image'` shapes as SVG `<image>` elements
-- [ ] In `DiagramMapper`, detect image shapes and route to ts-visio image embedding API
+- [x] Handle image file drop on canvas: read as base64 data URL, dispatch `ADD_SHAPE` with `type: 'image'`
+- [x] Render `type: 'image'` shapes as SVG `<image>` elements
+- [x] In `DiagramMapper`, detect image shapes and store src as custom property for round-trip fidelity
 
 ---
 
@@ -349,11 +349,11 @@ These are independent of each other and can be picked up in any order after Phas
 
 A minor UX improvement: let the user choose the filename before downloading the `.vsdx` file.
 
-- [ ] Add an editable "Filename" field to the document (either as a separate UI input or by promoting `meta.title` as the editable label in the toolbar)
-- [ ] Pre-populate with the current `meta.title` (defaulting to `"diagram"` if blank)
-- [ ] Sanitize the value client-side (strip characters that are invalid in filenames: `/ \ : * ? " < > |`) before passing to `a.download`
-- [ ] Reflect the filename in the `Content-Disposition` header returned by the backend export route (the backend already sanitizes; the frontend name is only used for the anchor download attribute)
-- [ ] Add a test asserting the sanitized filename is applied to the `<a download>` attribute
+- [x] Add an editable "Filename" field to the document (either as a separate UI input or by promoting `meta.title` as the editable label in the toolbar)
+- [x] Pre-populate with the current `meta.title` (defaulting to `"diagram"` if blank)
+- [x] Sanitize the value client-side (strip characters that are invalid in filenames: `/ \ : * ? " < > |`) before passing to `a.download`
+- [x] Reflect the filename in the `Content-Disposition` header returned by the backend export route (the backend already sanitizes; the frontend name is only used for the anchor download attribute)
+- [x] Add a test asserting the sanitized filename is applied to the `<a download>` attribute
 
 ---
 
