@@ -2,6 +2,7 @@ import { useRef, useEffect } from "react";
 import type { DiagramShape } from "@diagrammer/shared";
 import { DEFAULT_CONNECTOR_STYLE } from "@diagrammer/shared";
 import { toPixels, toInches, clientToSvgCoords } from "./units.js";
+import { useGlobalMouseDrag } from "./useGlobalMouseDrag.js";
 import type { ConnectionPoint } from "./shapes/ConnectionHandles.js";
 
 interface InProgress {
@@ -21,7 +22,7 @@ interface ConnectorDrawingProps {
 }
 
 export function ConnectorDrawing({ shapes, svgRef, transform, onConnect, inProgress, setInProgress }: ConnectorDrawingProps) {
-  // Use refs so stable listeners always read current values without re-registering
+  // Refs keep callbacks current without re-registering listeners
   const inProgressRef = useRef(inProgress);
   const shapesRef = useRef(shapes);
   const transformRef = useRef(transform);
@@ -34,46 +35,47 @@ export function ConnectorDrawing({ shapes, svgRef, transform, onConnect, inProgr
   onConnectRef.current = onConnect;
   setInProgressRef.current = setInProgress;
 
-  // Register listeners once; use refs to read current values on each event
+  const startDrag = useGlobalMouseDrag();
+  const isDraggingRef = useRef(false);
+
+  // Start a drag session whenever a new connection begins (inProgress: null → non-null).
+  // Guard with isDraggingRef so intermediate toPoint updates don't re-register listeners.
   useEffect(() => {
-    const onMouseMove = (e: MouseEvent) => {
-      if (!inProgressRef.current) return;
-      const svg = svgRef.current;
-      if (!svg) return;
-      const t = transformRef.current;
-      const { x: svgX, y: svgY } = clientToSvgCoords(e.clientX, e.clientY, svg.getBoundingClientRect(), t);
-      setInProgressRef.current({ ...inProgressRef.current, toPoint: { x: svgX, y: svgY } });
-    };
+    if (!inProgress || isDraggingRef.current) return;
+    isDraggingRef.current = true;
 
-    const onMouseUp = (e: MouseEvent) => {
-      const ip = inProgressRef.current;
-      if (!ip) return;
-      const svg = svgRef.current;
-      if (!svg) return;
-      const t = transformRef.current;
-      const { x: svgX, y: svgY } = clientToSvgCoords(e.clientX, e.clientY, svg.getBoundingClientRect(), t);
-      const inchX = toInches(svgX);
-      const inchY = toInches(svgY);
+    startDrag(
+      (e) => {
+        const svg = svgRef.current;
+        if (!svg || !inProgressRef.current) return;
+        const t = transformRef.current;
+        const { x: svgX, y: svgY } = clientToSvgCoords(e.clientX, e.clientY, svg.getBoundingClientRect(), t);
+        setInProgressRef.current({ ...inProgressRef.current, toPoint: { x: svgX, y: svgY } });
+      },
+      (e) => {
+        isDraggingRef.current = false;
+        const ip = inProgressRef.current;
+        if (!ip) return;
+        const svg = svgRef.current;
+        if (!svg) return;
+        const t = transformRef.current;
+        const { x: svgX, y: svgY } = clientToSvgCoords(e.clientX, e.clientY, svg.getBoundingClientRect(), t);
+        const inchX = toInches(svgX);
+        const inchY = toInches(svgY);
 
-      const target = shapesRef.current.find(
-        (s) =>
-          s.id !== ip.fromShapeId &&
-          inchX >= s.x && inchX <= s.x + s.width &&
-          inchY >= s.y && inchY <= s.y + s.height
-      );
+        const target = shapesRef.current.find(
+          (s) =>
+            s.id !== ip.fromShapeId &&
+            inchX >= s.x && inchX <= s.x + s.width &&
+            inchY >= s.y && inchY <= s.y + s.height
+        );
 
-      if (target) onConnectRef.current(ip.fromShapeId, target.id);
-      setInProgressRef.current(null);
-    };
-
-    window.addEventListener("mousemove", onMouseMove);
-    window.addEventListener("mouseup", onMouseUp);
-    return () => {
-      window.removeEventListener("mousemove", onMouseMove);
-      window.removeEventListener("mouseup", onMouseUp);
-    };
+        if (target) onConnectRef.current(ip.fromShapeId, target.id);
+        setInProgressRef.current(null);
+      },
+    );
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // register once on mount, refs keep values current
+  }, [inProgress]); // re-runs on each toPoint update; isDraggingRef guard prevents double-register
 
   if (!inProgress) return null;
 

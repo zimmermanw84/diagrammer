@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import type { DiagramShape, ShapeStyle } from "@diagrammer/shared";
 import { toPixels } from "../units.js";
+import { useGlobalMouseDrag } from "../useGlobalMouseDrag.js";
 import { ShapeGeometry } from "./ShapeGeometry.js";
 import { toSvgStyle } from "./shapeStyle.js";
 import { ConnectionHandles } from "./ConnectionHandles.js";
@@ -32,6 +33,7 @@ export function ShapeElement({
   const [draft, setDraft] = useState(shape.label);
   const [hovered, setHovered] = useState(false);
   const dragOrigin = useRef<{ mx: number; my: number; sx: number; sy: number } | null>(null);
+  const startDrag = useGlobalMouseDrag();
 
   const svgStyle = toSvgStyle(shape.style);
 
@@ -42,22 +44,16 @@ export function ShapeElement({
     onSelect(shape.id, e.shiftKey);
     dragOrigin.current = { mx: e.clientX, my: e.clientY, sx: shape.x, sy: shape.y };
 
-    const onMouseMove = (me: MouseEvent) => {
-      if (!dragOrigin.current) return;
-      const dx = (me.clientX - dragOrigin.current.mx) / toPixels(1);
-      const dy = (me.clientY - dragOrigin.current.my) / toPixels(1);
-      onMove(shape.id, dx, dy);
-      dragOrigin.current = { ...dragOrigin.current, mx: me.clientX, my: me.clientY };
-    };
-
-    const onMouseUp = () => {
-      dragOrigin.current = null;
-      window.removeEventListener("mousemove", onMouseMove);
-      window.removeEventListener("mouseup", onMouseUp);
-    };
-
-    window.addEventListener("mousemove", onMouseMove);
-    window.addEventListener("mouseup", onMouseUp);
+    startDrag(
+      (me) => {
+        if (!dragOrigin.current) return;
+        const dx = (me.clientX - dragOrigin.current.mx) / toPixels(1);
+        const dy = (me.clientY - dragOrigin.current.my) / toPixels(1);
+        onMove(shape.id, dx, dy);
+        dragOrigin.current = { ...dragOrigin.current, mx: me.clientX, my: me.clientY };
+      },
+      () => { dragOrigin.current = null; },
+    );
   };
 
   // ── inline label edit ───────────────────────────────────────────────────
