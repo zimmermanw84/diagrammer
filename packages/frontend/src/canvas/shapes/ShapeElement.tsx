@@ -78,6 +78,32 @@ export function ShapeElement({
   const labelX = textAlign === "left" ? 6 : textAlign === "right" ? w - 6 : w / 2;
   const labelY = h / 2;
 
+  const editInputProps: React.InputHTMLAttributes<HTMLInputElement> = {
+    autoFocus: true,
+    value: draft,
+    onChange: (e) => setDraft(e.target.value),
+    onBlur: commitEdit,
+    onKeyDown: (e) => {
+      if (e.key === "Enter") commitEdit();
+      if (e.key === "Escape") { setEditing(false); setDraft(shape.label); }
+    },
+    style: {
+      width: "100%",
+      height: "100%",
+      border: "none",
+      outline: "2px solid #4f8ef7",
+      borderRadius: 2,
+      padding: "2px 4px",
+      fontFamily,
+      fontSize,
+      fontWeight,
+      fontStyle,
+      textAlign,
+      background: "rgba(255,255,255,0.9)",
+      boxSizing: "border-box",
+    },
+  };
+
   return (
     <g
       transform={`translate(${x}, ${y})`}
@@ -100,33 +126,7 @@ export function ShapeElement({
       {/* label */}
       {editing ? (
         <foreignObject x={2} y={2} width={w - 4} height={h - 4}>
-          <input
-            // @ts-expect-error — xmlns required for SVG foreignObject
-            xmlns="http://www.w3.org/1999/xhtml"
-            autoFocus
-            value={draft}
-            onChange={(e) => setDraft(e.target.value)}
-            onBlur={commitEdit}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") commitEdit();
-              if (e.key === "Escape") { setEditing(false); setDraft(shape.label); }
-            }}
-            style={{
-              width: "100%",
-              height: "100%",
-              border: "none",
-              outline: "2px solid #4f8ef7",
-              borderRadius: 2,
-              padding: "2px 4px",
-              fontFamily,
-              fontSize,
-              fontWeight,
-              fontStyle,
-              textAlign,
-              background: "rgba(255,255,255,0.9)",
-              boxSizing: "border-box",
-            }}
-          />
+          <input {...editInputProps} />
         </foreignObject>
       ) : (
         shape.label && (
