@@ -159,13 +159,14 @@ function DiagramEditor() {
               }
             }}
           />
+          <div style={styles.toolbarDivider} />
           <div style={styles.toolbarActions}>
             <div style={styles.undoRedoRow}>
               <button
                 style={{ ...styles.undoRedoButton, ...(canUndo ? {} : styles.undoRedoDisabled) }}
                 onClick={() => dispatch({ type: "UNDO" })}
                 disabled={!canUndo}
-                title="Undo (Cmd/Ctrl+Z)"
+                title="Undo  ⌘Z / Ctrl+Z"
               >
                 Undo
               </button>
@@ -173,13 +174,14 @@ function DiagramEditor() {
                 style={{ ...styles.undoRedoButton, ...(canRedo ? {} : styles.undoRedoDisabled) }}
                 onClick={() => dispatch({ type: "REDO" })}
                 disabled={!canRedo}
-                title="Redo (Cmd/Ctrl+Y)"
+                title="Redo  ⌘⇧Z / Ctrl+Y"
               >
                 Redo
               </button>
             </div>
-            <ImportButton disabled={!isOnline} />
             <ExportButton doc={state.document} disabled={!isOnline} />
+            <ImportButton disabled={!isOnline} />
+            <div style={styles.toolbarDivider} />
             <button
               style={styles.newButton}
               onClick={() => {
@@ -257,6 +259,7 @@ function DiagramEditor() {
         </div>
 
         <div style={styles.properties}>
+          <div style={styles.propertiesHeader}>Properties</div>
           <PropertiesPanel />
         </div>
       </div>
@@ -289,6 +292,11 @@ const styles: Record<string, React.CSSProperties> = {
     flexDirection: "column",
     justifyContent: "space-between",
   },
+  toolbarDivider: {
+    height: "1px",
+    background: THEME.surface0,
+    margin: "4px 0",
+  },
   toolbarActions: {
     display: "flex",
     flexDirection: "column",
@@ -316,9 +324,9 @@ const styles: Record<string, React.CSSProperties> = {
     width: "100%",
     padding: "8px 12px",
     borderRadius: "6px",
-    border: `1px solid ${THEME.surface1}`,
+    border: "1px solid rgba(243, 139, 168, 0.4)",
     background: "transparent",
-    color: THEME.overlay2,
+    color: THEME.red,
     fontSize: "12px",
     cursor: "pointer",
   },
@@ -334,11 +342,21 @@ const styles: Record<string, React.CSSProperties> = {
     position: "relative",
   },
   properties: {
-    background: THEME.base,
+    background: THEME.mantle,
     color: THEME.text,
     padding: "16px",
     borderLeft: `1px solid ${THEME.surface0}`,
     overflowY: "auto",
+  },
+  propertiesHeader: {
+    fontSize: "11px",
+    fontWeight: 600,
+    textTransform: "uppercase",
+    letterSpacing: "0.08em",
+    color: THEME.overlay2,
+    paddingBottom: "12px",
+    marginBottom: "8px",
+    borderBottom: `1px solid ${THEME.surface0}`,
   },
   saveErrorBanner: {
     position: "fixed" as const,
