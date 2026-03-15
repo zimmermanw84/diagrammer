@@ -12,7 +12,7 @@ A client-side diagram editor with Visio export, built with TypeScript and React.
 
 ## Features
 
-- **Shape palette** — drag rectangle, ellipse, diamond, rounded rectangle, triangle, or parallelogram onto the canvas
+- **Shape palette** — two libraries (Basic Shapes and Flowchart) with drag-to-canvas; shapes include rectangle, ellipse, diamond, rounded rectangle, triangle, parallelogram, and flowchart symbols (process, decision, terminator, data, start/end)
 - **Canvas** — infinite SVG canvas with zoom (scroll wheel) and pan (space+drag or middle-click+drag)
 - **Selection** — click to select; resize with 8 handles; delete with the Delete key
 - **Connectors** — drag from a shape's N/E/S/W handle to another shape; straight, right-angle, and curved routing
@@ -111,7 +111,7 @@ DiagramDocument (JSON)
 
 **Shape types** — all six schema types are supported: `rectangle`, `ellipse`, `diamond`, `rounded_rectangle`, `triangle`, `parallelogram`.
 
-**Connectors** — straight, right-angle (orthogonal), and curved routing; arrow head types: `none`, `open`, `filled` (solid triangle), `crowsfoot`, `one`.
+**Connectors** — straight, right-angle (orthogonal), and curved routing; independent start and end arrow head types: `none`, `open`, `filled` (solid triangle), `crowsfoot`, `one`; line style: solid, dashed, or dotted.
 
 **Coordinate system** — the schema stores shapes with `(x, y)` as the **top-left corner in inches** using an SVG-style top-down Y axis. `DiagramMapper` converts to Visio's center-pin / Y-up coordinate system internally.
 
