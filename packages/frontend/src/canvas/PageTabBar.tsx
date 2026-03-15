@@ -140,7 +140,8 @@ const styles: Record<string, React.CSSProperties> = {
     display: "flex",
     alignItems: "stretch",
     background: THEME.mantle,
-    borderTop: `1px solid ${THEME.surface0}`,
+    borderTop: `2px solid ${THEME.surface1}`,
+    boxShadow: "0 -2px 8px rgba(0,0,0,0.25)",
     height: "32px",
     flexShrink: 0,
     overflowX: "auto",
@@ -159,7 +160,8 @@ const styles: Record<string, React.CSSProperties> = {
   tabActive: {
     background: THEME.base,
     color: THEME.text,
-    borderTop: `2px solid ${THEME.blue}`,
+    borderTop: `3px solid ${THEME.blue}`,
+    marginTop: "-1px",
   },
   tabInactive: {
     background: "transparent",
