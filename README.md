@@ -1,5 +1,7 @@
 # Diagrammer
 
+![Diagrammer preview](./diagrammer-preview.png)
+
 A client-side diagram editor with Visio export, built with TypeScript and React.
 
 ## Packages
