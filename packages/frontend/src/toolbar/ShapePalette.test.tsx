@@ -101,9 +101,9 @@ describe("ShapePalette — libraries", () => {
 
   it("renders all Basic Shapes tiles when expanded", () => {
     renderPalette();
-    const labels = ["Rectangle", "Ellipse", "Diamond", "Rounded", "Triangle", "Parallel"];
-    for (const label of labels) {
-      expect(screen.getByTitle(label)).toBeTruthy();
+    const titles = ["Rectangle", "Ellipse", "Diamond", "Rounded Rectangle", "Triangle", "Parallelogram"];
+    for (const title of titles) {
+      expect(screen.getByTitle(title)).toBeTruthy();
     }
   });
 
@@ -113,6 +113,34 @@ describe("ShapePalette — libraries", () => {
     for (const label of labels) {
       expect(screen.getByTitle(label)).toBeTruthy();
     }
+  });
+});
+
+describe("ShapePalette — tile tooltips", () => {
+  it("shows full name as tooltip for shapes with a tooltip field", () => {
+    renderPalette();
+    expect(screen.getByTitle("Rounded Rectangle")).toBeTruthy();
+    expect(screen.getByTitle("Parallelogram")).toBeTruthy();
+  });
+
+  it("falls back to label as tooltip for shapes without a tooltip field", () => {
+    renderPalette();
+    expect(screen.getByTitle("Rectangle")).toBeTruthy();
+    expect(screen.getByTitle("Ellipse")).toBeTruthy();
+    expect(screen.getByTitle("Triangle")).toBeTruthy();
+  });
+
+  it("drag initiates correctly using tooltip title for Rounded Rectangle tile", () => {
+    const onAddShape = vi.fn();
+    const svgRef = makeSvgRef({ left: 200, top: 100, right: 1000, bottom: 700 });
+    render(<ShapePalette svgRef={svgRef} transform={defaultTransform} onAddShape={onAddShape} />);
+
+    fireEvent.mouseDown(screen.getByTitle("Rounded Rectangle"), { clientX: 50, clientY: 50 });
+    fireEvent.mouseUp(window, { clientX: 500, clientY: 400 });
+
+    expect(onAddShape).toHaveBeenCalledOnce();
+    const [type] = onAddShape.mock.calls[0] as [ShapeType, number, number];
+    expect(type).toBe("rounded_rectangle");
   });
 });
 
