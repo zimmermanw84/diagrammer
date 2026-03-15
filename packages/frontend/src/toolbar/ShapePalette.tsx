@@ -11,6 +11,7 @@ import { THEME } from "../theme.js";
 export interface ShapeTemplate {
   type: ShapeType;
   label: string;
+  tooltip?: string;
 }
 
 export interface ShapeLibrary {
@@ -25,9 +26,9 @@ export const LIBRARIES: ShapeLibrary[] = [
       { type: "rectangle", label: "Rectangle" },
       { type: "ellipse", label: "Ellipse" },
       { type: "diamond", label: "Diamond" },
-      { type: "rounded_rectangle", label: "Rounded" },
+      { type: "rounded_rectangle", label: "Rounded", tooltip: "Rounded Rectangle" },
       { type: "triangle", label: "Triangle" },
-      { type: "parallelogram", label: "Parallel" },
+      { type: "parallelogram", label: "Parallel", tooltip: "Parallelogram" },
     ],
   },
   {
@@ -162,7 +163,7 @@ export function ShapePalette({ svgRef, transform, onAddShape }: ShapePaletteProp
             </button>
             {!isCollapsed && (
               <div style={styles.grid}>
-                {lib.shapes.map(({ type, label }) => (
+                {lib.shapes.map(({ type, label, tooltip }) => (
                   <div
                     key={label}
                     style={styles.tile}
@@ -170,7 +171,7 @@ export function ShapePalette({ svgRef, transform, onAddShape }: ShapePaletteProp
                       e.preventDefault();
                       setDrag({ type, x: e.clientX, y: e.clientY });
                     }}
-                    title={label}
+                    title={tooltip ?? label}
                   >
                     <svg viewBox="0 0 40 30" style={styles.preview}>
                       <ShapePreview type={type} />
