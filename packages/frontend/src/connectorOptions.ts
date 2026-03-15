@@ -8,8 +8,8 @@ export const ARROW_OPTIONS: { value: ArrowHeadType; label: string }[] = [
   { value: "one", label: "One" },
 ];
 
-export const DASH_OPTIONS: { value: StrokeDash; label: string }[] = [
-  { value: "solid", label: "—" },
-  { value: "dashed", label: "╌" },
-  { value: "dotted", label: "·····" },
+export const DASH_OPTIONS: { value: StrokeDash; label: string; tooltip: string }[] = [
+  { value: "solid",  label: "—",     tooltip: "Solid line"  },
+  { value: "dashed", label: "╌",     tooltip: "Dashed line" },
+  { value: "dotted", label: "·····", tooltip: "Dotted line" },
 ];

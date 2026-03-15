@@ -1,4 +1,4 @@
-import type { ConnectorStyle } from "@diagrammer/shared";
+import type { ConnectorStyle, ArrowHeadType } from "@diagrammer/shared";
 import { THEME } from "../theme.js";
 import { ARROW_OPTIONS, DASH_OPTIONS } from "../connectorOptions.js";
 
@@ -15,7 +15,7 @@ export function ConnectorDefaults({ style, onChange }: ConnectorDefaultsProps) {
       <div style={styles.row}>
         <span style={styles.label}>Line</span>
         <div style={styles.toggleGroup}>
-          {DASH_OPTIONS.map(({ value, label }) => (
+          {DASH_OPTIONS.map(({ value, label, tooltip }) => (
             <button
               key={value}
               style={{
@@ -23,7 +23,7 @@ export function ConnectorDefaults({ style, onChange }: ConnectorDefaultsProps) {
                 ...(style.strokeDash === value ? styles.toggleBtnActive : {}),
               }}
               onClick={() => onChange({ strokeDash: value })}
-              title={value}
+              title={tooltip}
               aria-pressed={style.strokeDash === value}
             >
               {label}
@@ -33,7 +33,21 @@ export function ConnectorDefaults({ style, onChange }: ConnectorDefaultsProps) {
       </div>
 
       <div style={styles.row}>
-        <span style={styles.label}>Arrow</span>
+        <span style={styles.label}>Start</span>
+        <select
+          value={style.arrowStart}
+          onChange={(e) => onChange({ arrowStart: e.target.value as ArrowHeadType })}
+          style={styles.select}
+          aria-label="Arrow start"
+        >
+          {ARROW_OPTIONS.map(({ value, label }) => (
+            <option key={value} value={value}>{label}</option>
+          ))}
+        </select>
+      </div>
+
+      <div style={styles.row}>
+        <span style={styles.label}>End</span>
         <select
           value={style.arrowEnd}
           onChange={(e) => onChange({ arrowEnd: e.target.value as ArrowHeadType })}
