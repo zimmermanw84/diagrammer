@@ -383,25 +383,25 @@ The connector schema already supports `strokeDash`, `arrowStart`, and `arrowEnd`
 A major feature: allow users to upload an existing `.vsdx` file and have it rendered on the canvas.
 
 **Backend — Parse route:**
-- [ ] Add `POST /api/v1/import/vsdx` route that accepts `multipart/form-data` with a single `.vsdx` file field
-- [ ] Use `ts-visio` to open the uploaded buffer and iterate pages, shapes, and connectors
-- [ ] Map ts-visio shape geometry (center-pin / Y-up) back to schema coordinates (top-left / Y-down in inches)
-- [ ] Map ts-visio shape types to `ShapeType` enum; fall back to `"rectangle"` for unrecognised types
-- [ ] Map ts-visio style properties (fill color, stroke color, line weight, line pattern) to `ShapeStyle`
-- [ ] Map ts-visio connectors (begin/end shape references) to `DiagramConnector`
-- [ ] Return a fully-valid `DiagramDocument` JSON response (validated with `DiagramDocumentSchema`)
-- [ ] Return 422 with a descriptive error body for unsupported or corrupt files
-- [ ] Write integration tests: round-trip (export then re-import a known fixture), empty file, corrupt file
+- [x] Add `POST /api/v1/import/vsdx` route that accepts `multipart/form-data` with a single `.vsdx` file field
+- [x] Use `ts-visio` to open the uploaded buffer and iterate pages, shapes, and connectors
+- [x] Map ts-visio shape geometry (center-pin / Y-up) back to schema coordinates (top-left / Y-down in inches)
+- [x] Map ts-visio shape types to `ShapeType` enum; fall back to `"rectangle"` for unrecognised types
+- [x] Map ts-visio style properties (fill color, stroke color, line weight, line pattern) to `ShapeStyle`
+- [x] Map ts-visio connectors (begin/end shape references) to `DiagramConnector`
+- [x] Return a fully-valid `DiagramDocument` JSON response (validated with `DiagramDocumentSchema`)
+- [x] Return 422 with a descriptive error body for unsupported or corrupt files
+- [x] Write integration tests: round-trip (export then re-import a known fixture), empty file, corrupt file
 
 **Frontend — Import UI:**
-- [ ] Add an "Import .vsdx" file input button to the Toolbar (hidden `<input type="file" accept=".vsdx">` triggered by a styled button)
-- [ ] On file selection: `POST /api/v1/import/vsdx` with the file as `FormData`
-- [ ] Loading state on the button during upload/parse
-- [ ] On success: dispatch `LOAD_DOCUMENT` action (new action) to replace the current document; prompt the user to confirm if the canvas is non-empty
-- [ ] On failure: display an error toast with the message from the error envelope
-- [ ] Add reducer support for `LOAD_DOCUMENT` — replaces `state.document`, resets `activePageId` to `pages[0].id`, clears `selection`
-- [ ] Add tests for the `LOAD_DOCUMENT` reducer case
-- [ ] Add component tests for the import button (file selection triggers fetch, loading state, success dispatch, error toast)
+- [x] Add an "Import .vsdx" file input button to the Toolbar (hidden `<input type="file" accept=".vsdx">` triggered by a styled button)
+- [x] On file selection: `POST /api/v1/import/vsdx` with the file as `FormData`
+- [x] Loading state on the button during upload/parse
+- [x] On success: dispatch `LOAD_DOCUMENT` action (new action) to replace the current document; prompt the user to confirm if the canvas is non-empty
+- [x] On failure: display an error toast with the message from the error envelope
+- [x] Add reducer support for `LOAD_DOCUMENT` — replaces `state.document`, resets `activePageId` to `pages[0].id`, clears `selection`
+- [x] Add tests for the `LOAD_DOCUMENT` reducer case
+- [x] Add component tests for the import button (file selection triggers fetch, loading state, success dispatch, error toast)
 
 ---
 

@@ -7,7 +7,7 @@
 
 | Item | Description | Status | PR |
 |------|-------------|--------|----|
-| 1 | Empty state overlay | ⬜ Pending | — |
+| 1 | Empty state overlay | ✅ Done | — |
 | 2 | Zoom controls widget | ⬜ Pending | — |
 | 3 | Canvas page boundary contrast | ⬜ Pending | — |
 | 4 | Toolbar layout (divider, danger button, reorder) | ✅ Done | #44 |
