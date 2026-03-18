@@ -104,5 +104,42 @@ export function usePanZoom(
     if (svgRef.current) svgRef.current.style.cursor = spaceDown.current ? "grab" : "default";
   }, []);
 
-  return { transform, transformRef, isDragging, onMouseDown, onMouseMove, onMouseUp };
+  const zoomAroundCenter = useCallback((factor: number) => {
+    const svg = svgRef.current;
+    if (!svg) return;
+    const { width, height } = svg.getBoundingClientRect();
+    const cx = width / 2;
+    const cy = height / 2;
+    setTransform((prev) => {
+      const nextScale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, prev.scale * factor));
+      const ratio = nextScale / prev.scale;
+      const next = { scale: nextScale, x: cx - ratio * (cx - prev.x), y: cy - ratio * (cy - prev.y) };
+      onTransformChange?.(next);
+      return next;
+    });
+  }, []);
+
+  const zoomIn = useCallback(() => zoomAroundCenter(1.25), [zoomAroundCenter]);
+  const zoomOut = useCallback(() => zoomAroundCenter(0.8), [zoomAroundCenter]);
+
+  const resetZoom = useCallback(() => {
+    const svg = svgRef.current;
+    if (!svg) return;
+    const { width, height } = svg.getBoundingClientRect();
+    const next = { scale: 1, x: (width - pageW) / 2, y: (height - pageH) / 2 };
+    setTransform(next);
+    onTransformChange?.(next);
+  }, [pageW, pageH]);
+
+  const fitToScreen = useCallback(() => {
+    const svg = svgRef.current;
+    if (!svg) return;
+    const { width, height } = svg.getBoundingClientRect();
+    const scale = Math.min(width / pageW, height / pageH) * 0.9;
+    const next = { scale, x: (width - pageW * scale) / 2, y: (height - pageH * scale) / 2 };
+    setTransform(next);
+    onTransformChange?.(next);
+  }, [pageW, pageH]);
+
+  return { transform, transformRef, isDragging, onMouseDown, onMouseMove, onMouseUp, zoomIn, zoomOut, resetZoom, fitToScreen };
 }
