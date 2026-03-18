@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import { DiagramProvider, useDiagram } from "./state/index.js";
 import { Canvas } from "./canvas/Canvas.js";
+import { EmptyStateOverlay } from "./canvas/EmptyStateOverlay.js";
 import { ShapeLayer } from "./canvas/shapes/ShapeLayer.js";
 import { ConnectorLayer } from "./canvas/connectors/ConnectorLayer.js";
 import { ConnectorDrawing, resolveConnectionPoint } from "./canvas/ConnectorDrawing.js";
@@ -10,7 +11,7 @@ import { useKeyboardShortcuts } from "./canvas/useKeyboardShortcuts.js";
 import { PropertiesPanel } from "./properties/PropertiesPanel.js";
 import { DEFAULT_SHAPE_STYLE } from "@diagrammer/shared";
 import type { ShapeType } from "@diagrammer/shared";
-import { toInches, clientToSvgCoords } from "./canvas/units.js";
+import { toInches, toPixels, clientToSvgCoords } from "./canvas/units.js";
 import { ShapePalette } from "./toolbar/ShapePalette.js";
 import { PageTabBar } from "./canvas/PageTabBar.js";
 import { ConnectorDefaults } from "./toolbar/ConnectorDefaults.js";
@@ -31,6 +32,8 @@ function DiagramEditor() {
   const svgRef = useRef<SVGSVGElement>(null);
   const [transform, setTransform] = useState({ scale: 1, x: 0, y: 0 });
   const [inProgress, setInProgress] = useState<InProgress | null>(null);
+
+  const isEmpty = activePage.shapes.length === 0 && activePage.connectors.length === 0;
 
   // Derive selected shapes (for SelectionOverlay + AlignmentToolbar)
   const selectedShapes = activePage.shapes.filter((s) => state.selection.includes(s.id));
@@ -210,6 +213,12 @@ function DiagramEditor() {
               onDeselect={() => dispatch({ type: "SELECT", payload: { id: null } })}
               onRubberBandSelect={handleRubberBandSelect}
             >
+              {isEmpty && (
+                <EmptyStateOverlay
+                  pageW={toPixels(activePage.width)}
+                  pageH={toPixels(activePage.height)}
+                />
+              )}
               <ConnectorLayer
                 connectors={activePage.connectors}
                 shapes={activePage.shapes}
