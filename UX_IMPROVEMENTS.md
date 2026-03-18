@@ -8,8 +8,8 @@
 | Item | Description | Status | PR |
 |------|-------------|--------|----|
 | 1 | Empty state overlay | ✅ Done | — |
-| 2 | Zoom controls widget | ⬜ Pending | — |
-| 3 | Canvas page boundary contrast | ⬜ Pending | — |
+| 2 | Zoom controls widget | ✅ Done | — |
+| 3 | Canvas page boundary contrast | ✅ Done | — |
 | 4 | Toolbar layout (divider, danger button, reorder) | ✅ Done | #44 |
 | 5 | Properties panel header + background | ✅ Done | #44 |
 | 6 | Connector defaults (arrowStart + tooltips) | ✅ Done | #43 |

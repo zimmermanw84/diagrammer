@@ -1,7 +1,9 @@
 import { useRef, useState } from "react";
 import { DiagramProvider, useDiagram } from "./state/index.js";
 import { Canvas } from "./canvas/Canvas.js";
+import type { ZoomAPI } from "./canvas/Canvas.js";
 import { EmptyStateOverlay } from "./canvas/EmptyStateOverlay.js";
+import { ZoomControls } from "./canvas/ZoomControls.js";
 import { ShapeLayer } from "./canvas/shapes/ShapeLayer.js";
 import { ConnectorLayer } from "./canvas/connectors/ConnectorLayer.js";
 import { ConnectorDrawing, resolveConnectionPoint } from "./canvas/ConnectorDrawing.js";
@@ -31,6 +33,7 @@ function DiagramEditor() {
   )!;
   const svgRef = useRef<SVGSVGElement>(null);
   const [transform, setTransform] = useState({ scale: 1, x: 0, y: 0 });
+  const [zoomAPI, setZoomAPI] = useState<ZoomAPI | null>(null);
   const [inProgress, setInProgress] = useState<InProgress | null>(null);
 
   const isEmpty = activePage.shapes.length === 0 && activePage.connectors.length === 0;
@@ -200,6 +203,7 @@ function DiagramEditor() {
 
         <div style={styles.canvas}>
           <div style={styles.canvasArea} onDrop={handleImageDrop} onDragOver={(e) => e.preventDefault()}>
+            {zoomAPI && <ZoomControls scale={transform.scale} {...zoomAPI} />}
             {selectedShapes.length >= 2 && (
               <AlignmentToolbar
                 shapes={selectedShapes}
@@ -210,6 +214,7 @@ function DiagramEditor() {
               page={activePage}
               svgRef={svgRef}
               onTransformChange={setTransform}
+              onZoomReady={setZoomAPI}
               onDeselect={() => dispatch({ type: "SELECT", payload: { id: null } })}
               onRubberBandSelect={handleRubberBandSelect}
             >
